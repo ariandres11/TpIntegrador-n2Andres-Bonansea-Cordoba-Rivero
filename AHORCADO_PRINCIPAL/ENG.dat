@@ -1,16 +1,20 @@
 Cheese,Bread,Cookies,Milk,Flowers,Car,Motorcycle,Airplane,Doctor,Mechanic,Locksmith,Lawyer
 HANGMAN GAME
-**** CATEGORIES ****
-1. FRUITS
-2. ANIMALS
-3. COUNTRIES
-4. OBJECTS
-Enter an option:
-Available Attempts:
+**** MENU ****
+1. PLAY
+2. PLAYER LEADERBOARD
+3. SHOW WORD LIST SORTED BY DIFICULTY (LENGHT)
+4. SAVE CURRENT LANGUAGE AS DEFAULT
+5. EXIT
+Choose an option:
+Invalid Option!
+Intentos Disponibles:
 Score:
-YOU LOST
-THE SOLUTION WAS:
+GAME OVER!!
+THE WORD WAS:
 CONGRATULATIONS.. YOU WON!!
-Press any key to play again..
-Enter a letter:
-Tried Letters:
+Press a key to return to the menu..
+Input a key:
+Letters Tried:
+Thank you for Playing!!!
+CREDITS: Andres Ariel Sebastian, Bonansea Mariano Nicolas, Cordoba Luis Tahiel, Rivero Lucia Jazmin
