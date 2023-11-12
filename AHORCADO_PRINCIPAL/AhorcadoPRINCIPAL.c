@@ -38,22 +38,24 @@ typedef struct{
 	char *volverAJugar;
 	char *digiteLetra;
 	char *letProb;
+	char *despedida;
+	char *creditos;
     Palabra *palabras;
 }Idioma;
 
 // PROTOTIPOS DE LAS FUNCIONES
 //Menues y parte grafica
-void MenuInicio(Idioma *idioma, int cantPalabras);
-void EmpezarJuego(Idioma *idioma, int cantPalabras);
+void MenuInicio(Idioma *idioma, int cantPalabras, char *base);
+void EmpezarJuego(Idioma *idioma, int cantPalabras, char *base);
 void DibujarAhorcado(int intentos);
 void MostrarLetrasProbadas(Idioma *idioma, char letras[6], int intentos);
 
 //Logica del juego
 void CompararPalabras(char *palabraIngresada, char *palabraBuscada, int longitud, char *frase);
 int AcertarLetra(char letra, char *palabra, int longitud, char *frase);
-void JuegoGanado(Idioma *idioma, int cantPalabras, char *frase, int longitud);
-void JuegoPerdido(Idioma *idioma, int cantPalabras, char *palabra, int intentos);
-void VolverAJugar(Idioma *idioma, int cantPalabras);
+void JuegoGanado(Idioma *idioma, int cantPalabras, char *frase, int longitud, char *base);
+void JuegoPerdido(Idioma *idioma, int cantPalabras, char *palabra, int intentos, char *base);
+void VolverAJugar(Idioma *idioma, int cantPalabras, char *base);
 
 //Funciones de la carga del Idioma
 int ContarPalabras(char *string);
@@ -61,16 +63,17 @@ void GuardarPalabras(Idioma *idioma,char *string);
 int CargarIdioma(Idioma *idioma,char *nombreArchivo);
 void AsignarMemoria(char **puntero,FILE *fp);
 void ImpresionDebugRegistro(Idioma *idioma, int cant);
-void GuardarIdioma();
+void GuardarIdioma(char *base);
 
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
 int main(int argc, char *argv[])
 {
     Idioma *idioma = (Idioma *)malloc(sizeof(Idioma)); //Reservo memoria para el registro de idioma completo
-    int cantPalabras;
+    int cantPalabras; //Cantidad de palabras totales para adivinar
 	
-    char base[20];
+    char *base; //Puntero para guardar el nombre del archivo del idioma
+
     if (argc < 2) {
 		//Busco el nombre del archivo default a leer en el archivo default
 		FILE *dl = fopen("_default.dat","r");
@@ -86,14 +89,14 @@ int main(int argc, char *argv[])
 		ImpresionDebugRegistro(idioma,cantPalabras);
 	#endif
 
-	MenuInicio(idioma,cantPalabras);
-	system("pause");
+	MenuInicio(idioma,cantPalabras,base);
+	//system("pause");
 	return 0;
 }
 
 //------------------------------------------------------------- MenuInicio --------------------------------------------------------------
 // La funcion muestra el menu del juego y permite seleccionar una opcion
-void MenuInicio(Idioma *idioma, int cantPalabras)
+void MenuInicio(Idioma *idioma, int cantPalabras, char *base)
 {
 	int op;
 	do
@@ -112,7 +115,7 @@ void MenuInicio(Idioma *idioma, int cantPalabras)
 		{
 			printf(" %s ",idioma->selOP); //Seleccione una opcion:
 			scanf("%i", &op);
-			if (op < 1 || op > 4)
+			if (op < 1 || op > 5)
 			{
 				printf("X %s X\n",idioma->invOP); //Opcion Invalida
 			}
@@ -121,7 +124,7 @@ void MenuInicio(Idioma *idioma, int cantPalabras)
 		switch (op)
 		{
 		case 1:
-			EmpezarJuego(idioma,cantPalabras);
+			EmpezarJuego(idioma,cantPalabras,base);
 			break;
 
 		case 2:
@@ -133,11 +136,14 @@ void MenuInicio(Idioma *idioma, int cantPalabras)
 			break;
 
 		case 4:
-			GuardarIdioma();
+			GuardarIdioma(base);
 			break;
 
 		case 5:
-			/* code */
+			printf("\t\t\t\t%s",idioma->despedida); //Gracias por jugar!!!
+			printf("\t%s\n\n",idioma->creditos); //creditos
+			system("pause");
+			exit(EXIT_SUCCESS);
 			break;
 
 		default:
@@ -151,7 +157,7 @@ void MenuInicio(Idioma *idioma, int cantPalabras)
 
 //--------------------------------------------------------------- EmpezarJuego ---------------------------------------------------------------
 // Bucle del juego
-void EmpezarJuego(Idioma *idioma,int cantPalabras)
+void EmpezarJuego(Idioma *idioma,int cantPalabras, char *base)
 {
 	int opcion, longitud, espacios, puntos = 1200;
 	char letras[15];
@@ -227,36 +233,36 @@ void EmpezarJuego(Idioma *idioma,int cantPalabras)
 		}
 
 		// comprobacion de finalizacion del juego
-		JuegoGanado(idioma, cantPalabras, frase, longitud);
-		JuegoPerdido(idioma, cantPalabras, palabraBuscada, intentos);
+		JuegoGanado(idioma, cantPalabras, frase, longitud, base);
+		JuegoPerdido(idioma, cantPalabras, palabraBuscada, intentos, base);
 	} while (intentos <= INTENTOSGB);
 
 	printf("\n\n");
 }
 
 //--------------------------------------------------------- VolverAJugar -------------------------------------------------------------------
-void VolverAJugar(Idioma *idioma, int cantPalabras)
+void VolverAJugar(Idioma *idioma, int cantPalabras, char *base)
 {
 	printf(" %s",idioma->volverAJugar); //Presiona una tecla para volver a jugar..
 	getch();
-	MenuInicio(idioma,cantPalabras);
+	MenuInicio(idioma,cantPalabras,base);
 }
 
 //--------------------------------------------------------- JuegoPerdido -------------------------------------------------------------------
 // comprobacion de condicion de finalizacion
-void JuegoPerdido(Idioma *idioma, int cantPalabras, char *palabra, int intentos)
+void JuegoPerdido(Idioma *idioma, int cantPalabras, char *palabra, int intentos, char *base)
 {
 	if (intentos == INTENTOSGB)
 	{
 		printf("\n\n %s\n",idioma->perdiste); //PERDISTE!!
 		printf(" %s %s\n\n",idioma->solEra ,palabra); //LA SOLUCION ERA:
-		VolverAJugar(idioma, cantPalabras);
+		VolverAJugar(idioma,cantPalabras,base);
 	}
 }
 
 //--------------------------------------------------------- JuegoGanado -------------------------------------------------------------------
 // comprobacion de condicion para ganar
-void JuegoGanado(Idioma *idioma, int cantPalabras, char *frase, int longitud) 
+void JuegoGanado(Idioma *idioma, int cantPalabras, char *frase, int longitud, char *base) 
 {
 	int espacios = 0;
 
@@ -269,7 +275,7 @@ void JuegoGanado(Idioma *idioma, int cantPalabras, char *frase, int longitud)
 	if (espacios == 0)
 	{
 		printf("\n %s\n\n",idioma->ganaste); //FELICIDADES.. GANASTE!!
-		VolverAJugar(idioma, cantPalabras);
+		VolverAJugar(idioma,cantPalabras,base);
 	}
 }
 
@@ -466,14 +472,20 @@ int CargarIdioma(Idioma *idioma,char *nombreArchivo){
         	//Ganaste:
 			AsignarMemoria(&idioma->ganaste,fp);
 
-			//Volver a jugar:
+			//Presiona una tecla para volver al menu..
 			AsignarMemoria(&idioma->volverAJugar,fp);
 
-			//Digite Letra:
+			//Digite una letra:
 			AsignarMemoria(&idioma->digiteLetra,fp);
 
 			//Letras probadas:
 			AsignarMemoria(&idioma->letProb,fp);
+			
+			//Gracias por jugar!!!
+			AsignarMemoria(&idioma->despedida,fp);
+			
+			//**** Creditos: Andres Ariel Sebastian, Bonansea Mariano Nicolas, Cordoba Luis Tahiel, Rivero Lucia Jazmin ****
+			AsignarMemoria(&idioma->creditos,fp);
     }
 
     //Cierro el archivo de los idiomas pq no lo necesito mas por ahora
@@ -518,6 +530,6 @@ void ImpresionDebugRegistro(Idioma *idioma,int cant){
 }
 
 //-------------------------------------------------------------- GuardarIdioma ------------------------------------------------------------
-void GuardarIdioma(){
+void GuardarIdioma(char *base){
 
 }
