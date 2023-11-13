@@ -8,13 +8,17 @@ HANGMAN GAME
 5. EXIT
 Choose an option:
 Invalid Option!
-Intentos Disponibles:
-Score:
+Avalible attempts:
 GAME OVER!!
 THE WORD WAS:
 CONGRATULATIONS.. YOU WON!!
 Press a key to return to the menu..
 Input a key:
 Letters Tried:
-Thank you for Playing!!!
+Thanks for Playing!!!
+The file is empty!
+Deffault language:
+Current language:
+Do you want to change the deffault language with the current one? (1.Yes/2.No)
+Words Ordered by Difficulty
 CREDITS: Andres Ariel Sebastian, Bonansea Mariano Nicolas, Cordoba Luis Tahiel, Rivero Lucia Jazmin

@@ -9,7 +9,6 @@ JUEGO EL AHORCADO
 Ingresa una opcion:
 Opcion Invalida!
 Intentos Disponibles:
-Puntuacion:
 PERDISTE!!
 LA SOLUCION ERA:
 FELICIDADES.. GANASTE!!
@@ -17,4 +16,9 @@ Presiona una tecla para volver al menu..
 Digite una letra:
 Letras probadas:
 Gracias por jugar!!!
+Se encuentra vacio!
+Idioma por defecto:
+Idioma actual:
+Desea intercambiar el idioma por defecto por el idioma actual? (1.Si/2.No)
+Palabras Ordenadas por dificultad
 CREDITOS: Andres Ariel Sebastian, Bonansea Mariano Nicolas, Cordoba Luis Tahiel, Rivero Lucia Jazmin

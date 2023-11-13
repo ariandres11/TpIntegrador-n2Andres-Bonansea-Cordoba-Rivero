@@ -36,7 +36,6 @@ typedef struct{
     char *selOP;
     char *invOP;
 	char *intentos;
-	char *puntuacion;
 	char *perdiste;
 	char *solEra;
 	char *ganaste;
@@ -44,6 +43,11 @@ typedef struct{
 	char *digiteLetra;
 	char *letProb;
 	char *despedida;
+	char *archivoVacio;
+	char *idiomaDefecto;
+	char *idiomaActual;
+	char *intercambiarIdioma;
+	char *palabrasOrdenadas;
 	char *creditos;
     Palabra *palabras;
 }Idioma;
@@ -53,7 +57,7 @@ typedef struct{
 void MenuInicio(Idioma *idioma, int cantPalabras, char *base, bool debug);
 void EmpezarJuego(Idioma *idioma, int cantPalabras, char *base, bool debug);
 void DibujarAhorcado(int intentos);
-void MostrarLetrasProbadas(Idioma *idioma, char letras[6], int intentos);
+void MostrarLetrasProbadas(Idioma *idioma, char *letras, int intentos);
 
 //Logica del juego
 void CompararPalabras(char *palabraIngresada, char *palabraBuscada, int longitud, char *frase);
@@ -99,14 +103,14 @@ int main(int argc, char *argv[])
 	if (debug)
 	{
 		char input[strlen(PASSWORD)]; //Para el input del usuario de la contraseña
-		printf("Ingrese la contrasena del modo debug: ");
+		printf("Ingrese la contrasena del modo debug: "); //EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
 		scanf("%s",input);
 		if (strcmp(PASSWORD,input)!=0)
 		{
-			fprintf(stderr,"\n\tXXXX CONTRASENA INCORRECTA XXXX\n");
+			fprintf(stderr,"\n\tXXXX CONTRASENA INCORRECTA XXXX\n"); //EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
         	exit(EXIT_FAILURE);
 		}
-		printf("\tMODO DEBUG CON IDIOMA DEFAULT ACTIVADO!\n\n");
+		printf("\tMODO DEBUG CON IDIOMA DEFAULT ACTIVADO!\n\n"); //EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
 		system("pause");
 	}
 	
@@ -184,7 +188,7 @@ void MenuInicio(Idioma *idioma, int cantPalabras, char *base, bool debug)
 // Bucle del juego
 void EmpezarJuego(Idioma *idioma,int cantPalabras, char *base, bool debug)
 {
-	int opcion, longitud, espacios, puntos = 1200;
+	int opcion, longitud, espacios;
 	int intentos = 0;
 	int cantLetrasIng = 0;
 	char letrasProbadas[INTENTOSGB + 10];
@@ -216,16 +220,16 @@ void EmpezarJuego(Idioma *idioma,int cantPalabras, char *base, bool debug)
 		// muestra en pantalla la "interfaz" del juego
 		system("cls");
 		printf("\n\t\t\t\t%s\n\n",idioma->titulo); //JUEGO EL AHORCADO
-		printf(" %s %d\t %s %d\t\t",idioma->intentos, 6 - intentos,idioma->puntuacion, puntos); //Intentos Disponibles: , Puntuacion:
+		printf(" %s %d \t\t",idioma->intentos, INTENTOSGB - intentos); //Intentos Disponibles: 
 
 		//MODO DEBUG
 		if (debug) 
 		{
-			printf("Palabra a buscar: %s", idioma->palabras[opcion].string);
+			printf("Palabra a buscar: %s", idioma->palabras[opcion].string);//EL MODO DEBUG SIEMPRE SE IMPRIME EN ESPAÑOL
 		}
 	
 		if (cantLetrasIng > 0)
-			MostrarLetrasProbadas(idioma,letrasProbadas, cantLetrasIng);
+			MostrarLetrasProbadas(idioma,letrasProbadas, cantLetrasIng); 
 		
 		DibujarAhorcado(intentos);
 
@@ -245,7 +249,6 @@ void EmpezarJuego(Idioma *idioma,int cantPalabras, char *base, bool debug)
 		{
 			CompararPalabras(letras, palabraBuscada, longitud, frase);
 			intentos = INTENTOSGB;
-			puntos = 0;
 		}
 		else
 		{
@@ -254,7 +257,6 @@ void EmpezarJuego(Idioma *idioma,int cantPalabras, char *base, bool debug)
 			if (AcertarLetra(letras[0], palabraBuscada, longitud, frase) == 0)
 			{
 				intentos++;
-				puntos -= 200;
 			}
 		}
 
@@ -316,12 +318,6 @@ void CompararPalabras(char *palabraIngresada, char *palabraBuscada, int longitud
 			frase[j] = palabraIngresada[j];
 		}
 	}
-	else
-	{
-		printf("la palabra ingresada es erronea\n");
-		getchar();
-		getchar();
-	}
 }
 
 //------------------------------------------------------------- AcertarLetra ----------------------------------------------------------------
@@ -342,9 +338,9 @@ int AcertarLetra(char letra, char *palabra, int longitud, char *frase)
 
 //----------------------------------------------------------- MostrarLetrasProbadas -------------------------------------------------------------------
 // Funcion que imprime en pantalla las letras que fueron probadas hasta el momento
-void MostrarLetrasProbadas(Idioma *idioma, char letras[INTENTOSGB + 10], int intentos)
+void MostrarLetrasProbadas(Idioma *idioma, char *letras, int intentos)
 {
-	printf("\t Letras probadas: ");
+	printf("\t %s ",idioma->letProb); //Letras probadas:
 	for (int i = 0; i < intentos; i++)
 	{
 #ifdef DEBUGPRINTF
@@ -435,13 +431,11 @@ int CargarIdioma(Idioma *idioma,char *nombreArchivo){
 		fprintf(stderr,"No se pudo abrir correctamente el archivo en: %s\n", nombreArchivo);
         exit(EXIT_FAILURE);
     }
-    //El archivo se abre correctamente
-    printf("El archivo se abrio correctamente! %s\n", nombreArchivo);
     
     //El archivo se encuentra vacio
     if (fgets(string,sizeof(string),fp)==NULL)
     {
-        printf("\n\tEl archivo se encuentra vacio!\n");
+        printf("\n\t%s %s\n",nombreArchivo,idioma->archivoVacio); //se encuentra vacio!
     
     //El archivo tiene algo
     }else{
@@ -456,46 +450,43 @@ int CargarIdioma(Idioma *idioma,char *nombreArchivo){
 		GuardarPalabras(idioma,string);
 
 		//Resto de strings
-			//Titulo
+			//JUEGO EL AHORCADO
 			AsignarMemoria(&idioma->titulo,fp);
 
-			//Menu
+			//**** MENU ****
 			AsignarMemoria(&idioma->menu,fp);
 
-			//Jugar
+			//1. JUGAR
 			AsignarMemoria(&idioma->jugar,fp);
 
-			//Ranking
+			//2. RANKING DE JUGADORES
 			AsignarMemoria(&idioma->ranking,fp);
 			
-			//Mostrar Lista de palabras ordenadas por dificultad
+			//3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
 			AsignarMemoria(&idioma->listPalOrd,fp);
 
-			//Setear Idioma por defecto
+			//4. GUARDAR IDIOMA ACTUAL COMO POR DEFECTO
 			AsignarMemoria(&idioma->setIdi,fp);
 
-			//Salir
+			//5. SALIR
 			AsignarMemoria(&idioma->salir,fp);
 
-        	//Ingrese opcion
+        	//Ingresa una opcion:
 			AsignarMemoria(&idioma->selOP,fp);
 
-        	//Opcion Invalida
+        	//Opcion Invalida!
 			AsignarMemoria(&idioma->invOP,fp);
 
-			//Intentos Disponibles
+			//Intentos Disponibles:
 			AsignarMemoria(&idioma->intentos,fp);
 
-			//Puntuacion
-			AsignarMemoria(&idioma->puntuacion,fp);
-
-        	//Perdiste
+        	//PERDISTE!!
 			AsignarMemoria(&idioma->perdiste,fp);
 
         	//LA SOLUCION ERA:
 			AsignarMemoria(&idioma->solEra,fp);
 
-        	//Ganaste:
+        	//FELICIDADES.. GANASTE!!
 			AsignarMemoria(&idioma->ganaste,fp);
 
 			//Presiona una tecla para volver al menu..
@@ -509,6 +500,21 @@ int CargarIdioma(Idioma *idioma,char *nombreArchivo){
 			
 			//Gracias por jugar!!!
 			AsignarMemoria(&idioma->despedida,fp);
+			
+			//Se encuentra vacio
+			AsignarMemoria(&idioma->archivoVacio,fp);
+			
+			//Idioma por defecto:
+			AsignarMemoria(&idioma->idiomaDefecto,fp);
+			
+			//Idioma actual:
+			AsignarMemoria(&idioma->idiomaActual,fp);
+			
+			//Desea intercambiar el idioma por defecto por el idioma actual? (1.Si/2.No)
+			AsignarMemoria(&idioma->intercambiarIdioma,fp);
+			
+			//---- Palabras Ordenadas por dificultad ----
+			AsignarMemoria(&idioma->palabrasOrdenadas,fp);
 			
 			//**** Creditos: Andres Ariel Sebastian, Bonansea Mariano Nicolas, Cordoba Luis Tahiel, Rivero Lucia Jazmin ****
 			AsignarMemoria(&idioma->creditos,fp);
@@ -550,16 +556,16 @@ void GuardarIdioma(Idioma *idioma, char *base){
 	fgets(porDefecto,sizeof(porDefecto),dl); //Guardo el nombre del archivo que hay en el archivo default
 	rewind(dl); //Reinicio el cursor para que sobrescriba en vez de agregar
 	system("cls"); //Limpio pantalla
-	printf("Idioma por defecto: %s\n", porDefecto);
-	printf("Idioma actual: %s\n", base);
+	printf("%s %s\n", idioma->idiomaDefecto,porDefecto); //Idioma por defecto:
+	printf("%s %s\n", idioma->idiomaActual,base); //Idioma actual:
 	do
 	{
-		printf("Desea intercambiar el idioma por defecto por el idioma actual? (1.Si/2.No)\n");
+		printf("%s\n",idioma->intercambiarIdioma); //Desea intercambiar el idioma por defecto por el idioma actual? (1.Si/2.No)
 		scanf("%d",&o);
 
 		if (o<1 || o>2)
 		{
-			printf("\tIngrese una opcion valida!\n");
+			printf("\t%s\n",idioma->invOP); //Opcion Invalida!
 		}
 
 	} while (o<1 || o>2);
@@ -569,7 +575,7 @@ void GuardarIdioma(Idioma *idioma, char *base){
 		fputs(base,dl);
 		fclose(dl);
 	}
-	printf("Idioma por defecto: %s\n", base);
+	printf("%s %s\n",idioma->idiomaDefecto,porDefecto); //Idioma por defecto:
 	system("pause");
 }
 
@@ -577,7 +583,7 @@ void GuardarIdioma(Idioma *idioma, char *base){
 //-------------------------------------------------------- ImpresionListaPalabras ------------------------------------------------------
 void ImpresionListaPalabras(Idioma *idioma,int cant){
 	system("cls");
-	printf("Palabras:\n");
+	printf("\t\t\t---- %s ----\n",idioma->palabrasOrdenadas); //Palabras Ordenadas por dificultad
 	for (int i = 0; i < cant; i++)
 	{
 		printf("%s\n",idioma->palabras[i].string);
