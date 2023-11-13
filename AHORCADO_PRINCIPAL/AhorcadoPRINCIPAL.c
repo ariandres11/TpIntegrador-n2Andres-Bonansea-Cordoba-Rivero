@@ -590,3 +590,29 @@ void ImpresionListaPalabras(Idioma *idioma,int cant){
 	}
 	system("pause");	
 }
+//-------------------------------------------------------- ComprobarEspacios ------------------------------------------------------
+void ComprobarEspacios(Idioma *idioma, char*opcion){
+
+	if (TieneEspacios(opcion))
+	{
+		//Para cada espacio en vez de _ imprimir " " y marcar no adivinable
+		
+		
+	}
+	
+}
+int TieneEspacios(char* opcion){
+	int tam = strlen(opcion);
+	for (int i = 0; i < tam; i++)
+	{
+		if (opcion[i] == ' ')
+		{
+			printf(" ");//Caracter !adivinable
+			//strcpy();
+			return 1;
+		}else{
+			printf("_");//Caracter adivinable
+		}
+	}
+	return 0;
+}
