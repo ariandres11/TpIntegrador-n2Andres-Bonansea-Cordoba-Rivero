@@ -248,13 +248,14 @@ void EmpezarJuego(Idioma *idioma, int cantPalabras, char *base, bool debug)
 			printf(" %c ", frase[i]);
 		}
 
+		//Comprueba si se gano o se perdio (se hace en este momento para que te muestre el muñeco del ahorcado o la palabra completa en pantalla)
 		if (JuegoGanado(idioma, cantPalabras, frase, longitud, base, debug) == 1)
 		{
 			break;
 		}
 		else
 		{
-			if (JuegoPerdido(idioma, cantPalabras, palabraBuscada, intentos, base, debug))
+			if (JuegoPerdido(idioma, cantPalabras, palabraBuscada, intentos, base, debug) == 1)
 			{
 				break;
 			}
