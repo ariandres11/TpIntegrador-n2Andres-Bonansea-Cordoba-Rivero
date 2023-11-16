@@ -9,6 +9,7 @@
 // DEBUG por codigo
 // #define DEBUGPRINTFPROBADAS
 // #define DEBUGTRGISTRO
+// #define DEBUGMOSTRARLONGITUDPALABRAS
 
 // Constantes
 #define INTENTOSGB 6	 // cantidad de intentos en el juego (intentos GloBales)
@@ -67,6 +68,7 @@ int JuegoGanado(Idioma *idioma, int cantPalabras, char *frase, int longitud, cha
 int JuegoPerdido(Idioma *idioma, int cantPalabras, char *palabra, int intentos, char *base, bool debug);
 void VolverAJugar(Idioma *idioma, int cantPalabras, char *base, bool debug);
 int TieneEspacios(char *opcion);
+void ordenamientoPorInsercion(Palabra *arr, int longitud);
 
 // Funciones de la carga del Idioma
 int ContarPalabras(char *string);
@@ -169,6 +171,7 @@ void MenuInicio(Idioma *idioma, int cantPalabras, char *base, bool debug)
 			break;
 
 		case 3:
+		 	ordenamientoPorInsercion(idioma->palabras, cantPalabras);
 			ImpresionListaPalabras(idioma, cantPalabras);
 			MenuInicio(idioma, cantPalabras, base, debug);
 			break;
@@ -248,7 +251,7 @@ void EmpezarJuego(Idioma *idioma, int cantPalabras, char *base, bool debug)
 			printf(" %c ", frase[i]);
 		}
 
-		//Comprueba si se gano o se perdio (se hace en este momento para que te muestre el muñeco del ahorcado o la palabra completa en pantalla)
+		// Comprueba si se gano o se perdio (se hace en este momento para que te muestre el muñeco del ahorcado o la palabra completa en pantalla)
 		if (JuegoGanado(idioma, cantPalabras, frase, longitud, base, debug) == 1)
 		{
 			break;
@@ -625,6 +628,9 @@ void ImpresionListaPalabras(Idioma *idioma, int cant)
 	for (int i = 0; i < cant; i++)
 	{
 		printf("%s\n", idioma->palabras[i].string);
+		#ifdef DEBUGMOSTRARLONGITUDPALABRAS
+		printf("\tlongitud: %d \n",idioma->palabras[i].longitud);
+		#endif
 	}
 	system("pause");
 }
@@ -654,4 +660,24 @@ int TieneEspacios(char *opcion)
 		}
 	}
 	return 0;
+}
+
+void ordenamientoPorInsercion(Palabra *arr, int longitud)
+{
+	Palabra aux;
+	for (int i = 1; i < longitud ; i++)
+	{
+		int key = arr[i].longitud;
+		int j = i - 1;
+		// Mover los elementos del arr[0..i-1] que son mayores que la llave// a una posición adelante de su posición actual
+		while (j >= 0 && arr[j].longitud > key)
+		{
+			aux=arr[j];
+				arr[j]=arr[j+1];
+				arr[j+1]=aux;
+			//arr[j + 1] = arr[j];
+			j = j - 1;
+		}
+		arr[j + 1].longitud = key;
+	}
 }
