@@ -483,6 +483,7 @@ int CargarIdioma(Idioma *idioma, char *nombreArchivo)
 		fgets(string, sizeof(string), fp);
 		strcpy(aux, string);
 		cantPalabras = ContarPalabras(aux);
+		strtok(string, "\n");	  // Elimina el salto de línea del fgets utilizando strtok
 		idioma->palabras = (Palabra *)malloc(cantPalabras * sizeof(Palabra)); // Calculo el tamaño contando la cantidad de palabras
 		GuardarPalabras(idioma, string);
 
