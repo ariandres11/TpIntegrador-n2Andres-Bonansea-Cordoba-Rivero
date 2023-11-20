@@ -5,6 +5,7 @@
 #include <conio.h>
 #include <time.h>
 #include <stdbool.h>
+#include <dirent.h>
 
 // DEBUG por codigo
 // #define DEBUGPRINTFPROBADAS
@@ -47,7 +48,7 @@ typedef struct
 	char *despedida;
 	char *archivoVacio;
 	char *idiomaDefecto;
-	char *idiomaActual;
+	char *idiomasDisponibles;
 	char *intercambiarIdioma;
 	char *palabrasOrdenadas;
 	char *creditos;
@@ -76,8 +77,9 @@ void GuardarPalabras(Idioma *idioma, char *string);
 int CargarIdioma(Idioma *idioma, char *nombreArchivo);
 void AsignarMemoria(char **puntero, FILE *fp);
 void ImpresionListaPalabras(Idioma *idioma, int cant);
-void GuardarIdioma(Idioma *idioma, char *base);
+void GuardarIdioma(Idioma *idioma);
 void CargarDefaultABase(char *base);
+void leerDirectorio(char **files, int *tam);
 
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
@@ -177,7 +179,7 @@ void MenuInicio(Idioma *idioma, int cantPalabras, char *base, bool debug)
 			break;
 
 		case 4:
-			GuardarIdioma(idioma, base);
+			GuardarIdioma(idioma);
 			MenuInicio(idioma, cantPalabras, base, debug);
 			break;
 
@@ -546,7 +548,7 @@ int CargarIdioma(Idioma *idioma, char *nombreArchivo)
 		AsignarMemoria(&idioma->idiomaDefecto, fp);
 
 		// Idioma actual:
-		AsignarMemoria(&idioma->idiomaActual, fp);
+		AsignarMemoria(&idioma->idiomasDisponibles, fp);
 
 		// Desea intercambiar el idioma por defecto por el idioma actual? (1.Si/2.No)
 		AsignarMemoria(&idioma->intercambiarIdioma, fp);
@@ -584,41 +586,105 @@ void AsignarMemoria(char **puntero, FILE *fp)
 void CargarDefaultABase(char *base)
 {
 	// Busco el nombre del archivo default a leer en el archivo default
-	FILE *dl = fopen("_default.dat", "r");
+	FILE *dl = fopen("Idiomas/_default.dat", "r");
 	fscanf(dl, "%[^\n]", base);
 	fclose(dl);
 }
 
 //-------------------------------------------------------------- GuardarIdioma ------------------------------------------------------------
-void GuardarIdioma(Idioma *idioma, char *base)
+void GuardarIdioma(Idioma *idioma)
 {
-	FILE *dl = fopen("_default.dat", "r+");
+	FILE *dl = fopen("Idiomas/_default.dat", "r"); //Abro archivo en modo lectura para leer el idioma que esta por defecto
 	char porDefecto[TSTRCHICO];
-	int o;
+	int o; //Selector de opcion
+	int tam=0; //Contador de archivos
+	char **files= malloc(10 * sizeof(char *)); // reservamos memoria para el arreglo de nombres de archivos
+
+	system("cls"); // Limpio pantalla
+
 	fgets(porDefecto, sizeof(porDefecto), dl);			  // Guardo el nombre del archivo que hay en el archivo default
-	rewind(dl);											  // Reinicio el cursor para que sobrescriba en vez de agregar
-	system("cls");										  // Limpio pantalla
-	printf("%s %s\n", idioma->idiomaDefecto, porDefecto); // Idioma por defecto:
-	printf("%s %s\n", idioma->idiomaActual, base);		  // Idioma actual:
+	fclose(dl); // Cierro el archivo abierto en modo lectura para despues abrirlo en modo escritura
+	printf("\t---- %s %s ----\n", idioma->idiomaDefecto, porDefecto); // Idioma por defecto:
+
+	leerDirectorio(files,&tam); //Funcion de leer todos los archivos en el directorio de Idioma
+	printf("\n%s\n", idioma->idiomasDisponibles);		  // Idiomas disponibles:
+
+	//Imprimo los Idiomas del archivo
+	for (int i = 0; i < tam; i++)
+	{
+		printf("%s\n",files[i]);
+	}
+	
 	do
 	{
-		printf("%s\n", idioma->intercambiarIdioma); // Desea intercambiar el idioma por defecto por el idioma actual? (1.Si/2.No)
+		printf("\n%s %d:\n", idioma->intercambiarIdioma, tam); // Elija un idioma del 1 al n
 		scanf("%d", &o);
 
-		if (o < 1 || o > 2)
+		if (o < 1 || o > tam)
 		{
 			printf("\t%s\n", idioma->invOP); // Opcion Invalida!
 		}
 
-	} while (o < 1 || o > 2);
+	} while (o < 1 || o > tam);
 
-	if (o == 1)
+	//Cargo el idioma con el nombre del archivo elegido
+	dl = fopen("Idiomas/_default.dat","w"); //Abro el archivo en modo escritura para limpiarlo del anterior
+	fputs("Idiomas/", dl); //Le agrego al contenido del archivo el directorio de los idiomas
+	fputs(files[o-1], dl); //Le agrego al archivo el nombre del idioma
+	fclose(dl); // Cierro el archivo en modo escritura
+	printf("\n%s %s\n", idioma->idiomaDefecto, files[o-1]); // Idioma por defecto:
+
+	//LIBERO MEMORIA DE CADA NOMBRE DE ARCHIVO DE DIRECTORIO Y DEL ARREGLO DE DIRECTORIOS
+	for (int i = 0; i < tam; i++)
 	{
-		fputs(base, dl);
-		fclose(dl);
+		free(files[i]);
 	}
-	printf("%s %s\n", idioma->idiomaDefecto, porDefecto); // Idioma por defecto:
+	free(files);
+
 	system("pause");
+}
+
+//-------------------------------------------------------- LEER DIRECTORIO ------------------------------------------------------
+void leerDirectorio(char **files, int *tam){
+	DIR *d = opendir("Idiomas"); // puntero a un flujo de directorio
+	struct dirent *dir; // estructura para almacenar información de cada entrada
+	
+	if (d == NULL) { // comprobamos si hubo algún error
+		fprintf(stderr,"No se pudo abrir el directorio");
+		exit(EXIT_FAILURE);
+  	}
+	
+  	int max = 10; // tamaño inicial del arreglo (En caso de que existan mas que 10 idiomas se adecua la memoria para todos)
+	
+  	if (files == NULL) { // comprobamos si hubo algún error
+    	fprintf(stderr,"No se pudo reservar memoria");
+    	exit(EXIT_FAILURE);
+  	}
+
+	while ((dir = readdir(d)) != NULL) { // leemos cada entrada del directorio
+		if (strcmp(dir->d_name, "_default.dat") != 0 && strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0) {// ignoramos los directorios "." , ".." y el del idioma default
+			
+			//Condicional para evaluar si hay que redimensionar la memoria reservada
+			if (max == *tam) { // si el arreglo está lleno, lo redimensionamos
+				max *= 2; // duplicamos el tamaño
+				files = realloc(files, max * sizeof(char *)); // reasignamos memoria
+				if (files == NULL) { // comprobamos si hubo algún error
+					fprintf(stderr,"No se pudo reasignar memoria");
+					exit(EXIT_FAILURE);
+				}
+			}
+
+			files[*tam] = malloc(strlen(dir->d_name) + 1); // reservamos memoria para cada cadena
+			if (files[*tam] == NULL) { // comprobamos si hubo algún error en esta asignacion de memoria
+				fprintf(stderr,"No se pudo reservar memoria");
+				exit(EXIT_FAILURE);
+			}
+
+			strcpy(files[*tam], dir->d_name); // copiamos el nombre del archivo
+			(*tam)++; // incrementamos el contador
+		}
+	}
+	closedir(d); // cerramos el flujo de directorio
 }
 
 //-------------------------------------------------------- ImpresionListaPalabras ------------------------------------------------------

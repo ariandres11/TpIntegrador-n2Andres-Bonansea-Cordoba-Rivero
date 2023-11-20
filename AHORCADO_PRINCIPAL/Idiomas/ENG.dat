@@ -4,7 +4,7 @@ HANGMAN GAME
 1. PLAY
 2. PLAYER LEADERBOARD
 3. SHOW WORD LIST SORTED BY DIFICULTY (LENGHT)
-4. SAVE CURRENT LANGUAGE AS DEFAULT
+4. CHOOSE DEFAULT LANGUAGE
 5. EXIT
 Choose an option:
 Invalid Option!
@@ -18,7 +18,7 @@ Letters Tried:
 Thanks for Playing!!!
 The file is empty!
 Deffault language:
-Current language:
-Do you want to change the deffault language with the current one? (1.Yes/2.No)
+Available languages:
+Choose a language between 1 and
 Words Ordered by Difficulty
 CREDITS: Andres Ariel Sebastian, Bonansea Mariano Nicolas, Cordoba Luis Tahiel, Rivero Lucia Jazmin

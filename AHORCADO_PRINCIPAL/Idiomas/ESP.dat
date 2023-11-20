@@ -4,7 +4,7 @@ JUEGO EL AHORCADO
 1. JUGAR
 2. RANKING DE JUGADORES
 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
-4. GUARDAR IDIOMA ACTUAL COMO POR DEFECTO
+4. ELEGIR IDIOMA POR DEFECTO
 5. SALIR
 Ingresa una opcion:
 Opcion Invalida!
@@ -18,7 +18,7 @@ Letras probadas:
 Gracias por jugar!!!
 Se encuentra vacio!
 Idioma por defecto:
-Idioma actual:
-Desea intercambiar el idioma por defecto por el idioma actual? (1.Si/2.No)
+Idiomas disponibles:
+Elija un idioma del 1 al
 Palabras Ordenadas por dificultad
 CREDITOS: Andres Ariel Sebastian, Bonansea Mariano Nicolas, Cordoba Luis Tahiel, Rivero Lucia Jazmin
