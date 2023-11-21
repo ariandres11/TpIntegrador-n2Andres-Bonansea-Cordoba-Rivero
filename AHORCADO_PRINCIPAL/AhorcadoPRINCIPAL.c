@@ -31,6 +31,11 @@ typedef struct
 //Idioma
 typedef struct
 {
+	char *ingresaNom;
+	char *bienvenido;
+	char *reglasJuego;
+	char *reglas1;
+	char *reglas2;
 	char *titulo;
 	char *menu;
 	char *jugar;
@@ -60,7 +65,7 @@ typedef struct
 //Jugador
 typedef struct 
 {
-    char *nombre;
+    char nombre[TSTRCHICO];
     int intentos;
     double tiempo;
 }Jugador;
@@ -95,7 +100,10 @@ void CargarDefaultABase(char *base);
 void LeerDirectorio(char **files, int *tam);
 
 //Ranking de jugadores
-
+void limpieza_leaderboard(Jugador *leaderboard);
+void altualizar_ranking(Jugador *jugador, Jugador *leaderboard);
+void impresion_ranking(Jugador *leaderboard);
+void cargar_jugador(Jugador *jugador);
 
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
@@ -148,6 +156,7 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
 		switch (op)
 		{
 		case 1:
+			SaludoEInstrucciones(idioma,jugadorActual);
 			EmpezarJuego(idioma, cantPalabras, base, debug);
 			break;
 
@@ -514,6 +523,21 @@ void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras)
 		GuardarPalabras(idioma, string);
 
 		// Resto de strings
+		// Por favor ingresa tu nombre:
+		AsignarMemoria(&idioma->ingresaNom, fp);
+
+		// Bienvenido
+		AsignarMemoria(&idioma->bienvenido, fp);
+
+		// ---- Reglas del juego ----
+		AsignarMemoria(&idioma->reglasJuego, fp);
+
+		// Tendras 6 intentos para adivinar una palabra, podes ingresar caracter a caracter o ingresar la palabra completa,
+		AsignarMemoria(&idioma->reglas1, fp);
+
+		// pero cuidado porque si fallas perdes automaticamente. Buena Suerte!
+		AsignarMemoria(&idioma->reglas2, fp);
+
 		// JUEGO EL AHORCADO
 		AsignarMemoria(&idioma->titulo, fp);
 
@@ -770,6 +794,13 @@ void OrdenamientoBurbuja(Palabra *arr, int *cantPalabras)
 }
 
 void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador){
-	printf("Por favor ingresa tu nombre: ");
-	scanf("%d",jugador->nombre);
+	system("cls");
+	printf("%s ",idioma->ingresaNom); //Por favor ingresa tu nombre: 
+	scanf("%s",jugador->nombre);
+	system("cls");
+	printf("\n\t\t\t\t\t\t    %s %s!\n\n",idioma->bienvenido,jugador->nombre); //Bienvenido %s!
+	printf("\t\t\t\t\t\t%s\n\n",idioma->reglasJuego); //---- Reglas del juego ----
+	printf("\t%s\n",idioma->reglas1); //Tendras 6 intentos para adivinar una palabra, podes ingresar caracter a caracter o ingresar la palabra completa,
+	printf("\t\t%s\n\n\n",idioma->reglas2); //pero cuidado porque si fallas perdes automaticamente. Buena Suerte!
+	system("pause");
 }
