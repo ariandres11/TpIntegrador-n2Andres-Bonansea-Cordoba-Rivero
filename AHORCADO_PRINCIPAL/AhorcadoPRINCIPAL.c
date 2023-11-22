@@ -105,8 +105,9 @@ void LeerDirectorio(char **files, int *tam);
 void LimpiezaLeaderboard(Jugador *leaderboard);
 void ActualizarRanking(Jugador *jugador, Jugador *leaderboard);
 void ImpresionRanking(Jugador *leaderboard, Idioma *idioma);
-void CargandoRankig(Jugador *leaderboard);
-void GuardarNewRankin(Jugador *leaderboard);
+void CargarRankingDB(Jugador *leaderboard);
+void GuardarRankingDB(Jugador *leaderboard);
+
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
 int main(int argc, char *argv[])
@@ -116,15 +117,12 @@ int main(int argc, char *argv[])
 	int *cantPalabras = malloc(sizeof(int));		   // Cantidad de palabras totales para adivinar
 	bool *debug = malloc(sizeof(bool));				   // Booleano para saber si esta activado el modo DEBUG o no
 	Jugador leaderboard[JUGADORES_MAX];				   // Creo el leaderboard de jugadores
+	char base[TSTRCHICO];                              // Puntero para guardar el nombre del archivo del idioma
+
 	LimpiezaLeaderboard(leaderboard);				   // Limpio el leaderboard por las dudas
-
-	char base[TSTRCHICO]; // Puntero para guardar el nombre del archivo del idioma
-
 	EvaluarParametros(idioma, base, debug, argv, argc);
-
 	CargarIdioma(idioma, base, cantPalabras);
-	CargandoRankig(leaderboard);
-
+	CargarRankingDB(leaderboard);
 	MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
 
 	return 0;
@@ -186,7 +184,7 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 			printf("\n\n\t\t\t\t\t\t%s\n", idioma->despedida); // Gracias por jugar!!!
 			printf("\n\t**** %s ****\n\n", idioma->creditos);  // creditos
 			system("pause");
-			GuardarNewRankin(leaderboard); // Guardo el leadearboard en la DB
+			GuardarRankingDB(leaderboard); // Guardo el leadearboard en la DB
 			exit(EXIT_SUCCESS);
 			break;
 
@@ -298,14 +296,15 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	clock_t fin_cronometro = clock();														// Termino el cronometro
 	jugadorActual->tiempo += (double)(fin_cronometro - inicio_cronometro) / CLOCKS_PER_SEC; // Calculo el tiempo y lo guardo
 
+	system("pause"); //Pauso la consola para leer
+
 	if (jugadorActual->intentosTotales <= 6) // Si no perdio evaluo para el ranking
 	{
-		system("pause");
-		ActualizarRanking(jugadorActual, leaderboard);
-		ImpresionRanking(leaderboard, idioma);
+		ActualizarRanking(jugadorActual, leaderboard); //Actualizo el ranking (si es posible)
+		ImpresionRanking(leaderboard, idioma); //Imprimo el ranking
 	}
 
-	MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
+	MenuInicio(idioma, cantPalabras, base, debug, leaderboard); //Vuelvo a mostrar el menu
 }
 
 //--------------------------------------------------------- JuegoPerdido -------------------------------------------------------------------
@@ -904,51 +903,55 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 		}
 	}
 }
-// funcion para cargar el ranking desde el archivo
-void CargandoRankig(Jugador *leaderboard)
-{
-	FILE *archJugadores = fopen("Ranking.dat", "r");
 
-	char nombre[20];
-	double tiempo;
-	int intentoDB;
-	char descargar[150];
-	int eljugador = 0;
-	while (!(feof(archJugadores)))
+//-------------------------------- Cargar RankingDB ----------------------------
+void CargarRankingDB(Jugador *leaderboard)
+{
+	FILE *DB = fopen("_RankingDB.dat", "r");
+
+	char *descargar = malloc(sizeof(char*)); //String para obtener una linea de 1 jugador
+	
+	char *nombre = malloc(sizeof(char*)); //String auxiliar para guardar el nombre del jugador en el registro
+
+	int i = 0;
+	while (!(feof(DB)))
 	{
-		(fgets(descargar, 150, archJugadores));
-		sscanf(descargar, "%[^;];%d;%lf", nombre, &intentoDB, &tiempo);
-		strcpy(leaderboard[eljugador].nombre, nombre);
-		leaderboard[eljugador].tiempo = tiempo;
-		leaderboard[eljugador].intentosTotales = intentoDB;
-		eljugador++;
+		fgets(descargar, TSTRCHICO, DB); //Obtengo el string completo de la Base de datos sin separar
+		sscanf(descargar, "%[^;];%d;%lf", nombre, &leaderboard[i].intentosTotales, &leaderboard[i].tiempo); //Guardo nombre;intentos;tiempo en sus respectivas variables
+		strcpy(leaderboard[i].nombre, nombre); //Copio el nombre por separado pq no se le puede asignar directamente el string
+		i++; //Incremento el contador para desplazarme a la siguiente posicion del leaderboard
 	}
-	fclose(archJugadores);
+
+	fclose(DB);//Cierro el archivo
 }
-// guardar en el archivo el ranking
-void GuardarNewRankin(Jugador *leaderboard)
+
+//-------------------------------- Guardar RankingDB ----------------------------
+void GuardarRankingDB(Jugador *leaderboard)
 {
-	FILE *archJugadores = fopen("Ranking.dat", "w");
+	FILE *DB = fopen("_RankingDB.dat", "w");
 
-	char *cadenaAux = malloc(sizeof(char));
+	char *cadenaAux = malloc(sizeof(char)); //Cadena auxiliar para las conversiones de entero y flotante
 
+	//Recorro el arreglo de leaderboard completo y guardo a todos los jugadores
 	for (int i = 0; i < JUGADORES_MAX; i++)
 	{
-		char cargar[TSTRCHICO] = "";
-		strcpy(cargar, leaderboard[i].nombre);
-		sprintf(cadenaAux, "%d", leaderboard[i].intentosTotales);
-		strcat(cargar, ";");
-		strcat(cargar, cadenaAux);
-		strcat(cargar, ";");
-		sprintf(cadenaAux, "%.2f", leaderboard[i].tiempo);
-		strcat(cargar, cadenaAux);
+		char cargar[TSTRCHICO] = ""; //Declaro el string para cargar limpio de basura
+		strcpy(cargar, leaderboard[i].nombre); //Copio el nombre
+		strcat(cargar, ";"); //Concateno el ;
+		sprintf(cadenaAux, "%d", leaderboard[i].intentosTotales); //Convierto los intentos del registro a string
+		strcat(cargar, cadenaAux); //Concateno los intentos 
+		strcat(cargar, ";"); //Concateno el ;
+		sprintf(cadenaAux, "%.2f", leaderboard[i].tiempo); //Convierto el tiempo del registro a string
+		strcat(cargar, cadenaAux); //Concateno el tiempo
+
+		//Para que no cargue un salto de linea en el ultimo jugador
 		if (i < (JUGADORES_MAX - 1))
 		{
 			strcat(cargar, "\n");
 		}
-
-		fputs(cargar, archJugadores);
+		
+		fputs(cargar, DB); //Guardo la cadena en el archivo
 	}
-	fclose(archJugadores);
-	free(cadenaAux);
+
+	fclose(DB); //Cierro archivo de jugadores
 }
