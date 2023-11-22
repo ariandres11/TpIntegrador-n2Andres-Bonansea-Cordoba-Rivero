@@ -23,14 +23,14 @@
 #define JUGADORES_MAX 10 // cantidad de jugadores del ranking
 
 // REGISTROS
-//Palabra
+// Palabra
 typedef struct
 {
 	char string[TSTRGRANDE];
 	int longitud;
 } Palabra;
 
-//Idioma
+// Idioma
 typedef struct
 {
 	char *ingresaNom;
@@ -66,13 +66,13 @@ typedef struct
 	Palabra *palabras;
 } Idioma;
 
-//Jugador
-typedef struct 
+// Jugador
+typedef struct
 {
-    char nombre[TSTRCHICO];
-    int intentosTotales;
-    double tiempo;
-}Jugador;
+	char nombre[TSTRCHICO];
+	int intentosTotales;
+	double tiempo;
+} Jugador;
 
 // PROTOTIPOS DE LAS FUNCIONES
 // Menues y parte grafica
@@ -81,7 +81,6 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador);
 void DibujarAhorcado(int intentos);
 void MostrarLetrasProbadas(Idioma *idioma, char *letras, int intentos);
-
 
 // Logica del juego
 int CompararPalabras(char *palabraIngresada, char *palabraBuscada, int longitud, char *frase);
@@ -92,7 +91,7 @@ int TieneEspacios(char *opcion);
 void OrdenamientoBurbuja(Palabra *arr, int *cantPalabras);
 
 // Funciones de la carga del Idioma
-void EvaluarParametros(Idioma *idioma,char *base, bool *debug, char *argv[], int argc);
+void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], int argc);
 int ContarPalabras(char *string);
 void GuardarPalabras(Idioma *idioma, char *string);
 void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras);
@@ -102,29 +101,31 @@ void GuardarIdioma(Idioma *idioma);
 void CargarDefaultABase(char *base);
 void LeerDirectorio(char **files, int *tam);
 
-//Ranking de jugadores
+// Ranking de jugadores
 void LimpiezaLeaderboard(Jugador *leaderboard);
 void ActualizarRanking(Jugador *jugador, Jugador *leaderboard);
 void ImpresionRanking(Jugador *leaderboard, Idioma *idioma);
-
+void CargandoRankig(Jugador *leaderboard);
+void GuardarNewRankin(Jugador *leaderboard);
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
 int main(int argc, char *argv[])
 {
-	srand(getpid()); // Randomizacion
+	srand(getpid());								   // Randomizacion
 	Idioma *idioma = (Idioma *)malloc(sizeof(Idioma)); // Reservo memoria para el registro de idioma completo
-	int *cantPalabras = malloc(sizeof(int));           // Cantidad de palabras totales para adivinar
-	bool *debug = malloc(sizeof(bool));                //Booleano para saber si esta activado el modo DEBUG o no
-	Jugador leaderboard[JUGADORES_MAX]; //Creo el leaderboard de jugadores
-	LimpiezaLeaderboard(leaderboard); //Limpio el leaderboard por las dudas
+	int *cantPalabras = malloc(sizeof(int));		   // Cantidad de palabras totales para adivinar
+	bool *debug = malloc(sizeof(bool));				   // Booleano para saber si esta activado el modo DEBUG o no
+	Jugador leaderboard[JUGADORES_MAX];				   // Creo el leaderboard de jugadores
+	LimpiezaLeaderboard(leaderboard);				   // Limpio el leaderboard por las dudas
 
 	char base[TSTRCHICO]; // Puntero para guardar el nombre del archivo del idioma
 
-	EvaluarParametros(idioma,base,debug,argv,argc);
+	EvaluarParametros(idioma, base, debug, argv, argc);
 
 	CargarIdioma(idioma, base, cantPalabras);
+	CargandoRankig(leaderboard);
 
-	MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
+	MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
 
 	return 0;
 }
@@ -134,8 +135,7 @@ int main(int argc, char *argv[])
 void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *leaderboard)
 {
 	int op;
-	Jugador *jugadorActual=malloc(sizeof(Jugador)); //Creo el registro del jugador actual
-	
+	Jugador *jugadorActual = malloc(sizeof(Jugador)); // Creo el registro del jugador actual
 
 	do
 	{
@@ -162,30 +162,31 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 		switch (op)
 		{
 		case 1:
-			SaludoEInstrucciones(idioma,jugadorActual);
-			EmpezarJuego(idioma, cantPalabras, base, debug, jugadorActual,leaderboard);
+			SaludoEInstrucciones(idioma, jugadorActual);
+			EmpezarJuego(idioma, cantPalabras, base, debug, jugadorActual, leaderboard);
 			break;
 
 		case 2:
-			ImpresionRanking(leaderboard,idioma);
-			MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
+			ImpresionRanking(leaderboard, idioma);
+			MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
 			break;
 
 		case 3:
-		 	OrdenamientoBurbuja(idioma->palabras, cantPalabras);
+			OrdenamientoBurbuja(idioma->palabras, cantPalabras);
 			ImpresionListaPalabras(idioma, cantPalabras);
-			MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
+			MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
 			break;
 
 		case 4:
 			GuardarIdioma(idioma);
-			MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
+			MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
 			break;
 
 		case 5:
 			printf("\n\n\t\t\t\t\t\t%s\n", idioma->despedida); // Gracias por jugar!!!
 			printf("\n\t**** %s ****\n\n", idioma->creditos);  // creditos
 			system("pause");
+			GuardarNewRankin(leaderboard); // Guardo el leadearboard en la DB
 			exit(EXIT_SUCCESS);
 			break;
 
@@ -206,9 +207,8 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	int cantLetrasIng = 0;
 	char letrasProbadas[INTENTOSGB + 10];
 
-	jugadorActual->tiempo = 0.0; // Inicializo el tiempo del jugador
-	clock_t inicio_cronometro = clock(); //Inicio el cronometro
-	
+	jugadorActual->tiempo = 0.0;		 // Inicializo el tiempo del jugador
+	clock_t inicio_cronometro = clock(); // Inicio el cronometro
 
 	opcion = rand() % (*cantPalabras - 1);		  // Se genera el numero aleatorio de la palabra entre 1 y 9
 	longitud = idioma->palabras[opcion].longitud; // Se almacena el tamaño de la palabra
@@ -258,7 +258,7 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 		// Comprueba si se gano o se perdio (se hace en este momento para que te muestre el muñeco del ahorcado o la palabra completa en pantalla)
 		if (JuegoGanado(idioma, cantPalabras, frase, longitud, base, debug) == 1)
 		{
-			jugadorActual->intentosTotales = intentos+1; //Guardo los intentos restantes del jugador para el ranking
+			jugadorActual->intentosTotales = intentos + 1; // Guardo los intentos restantes del jugador para el ranking
 			break;
 		}
 		else
@@ -294,20 +294,19 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 		// comprobacion de finalizacion del juego
 
 	} while (intentos <= INTENTOSGB);
-	
-	clock_t fin_cronometro = clock(); // Termino el cronometro
+
+	clock_t fin_cronometro = clock();														// Termino el cronometro
 	jugadorActual->tiempo += (double)(fin_cronometro - inicio_cronometro) / CLOCKS_PER_SEC; // Calculo el tiempo y lo guardo
 
-	if (jugadorActual->intentosTotales <= 6) //Si no perdio evaluo para el ranking
+	if (jugadorActual->intentosTotales <= 6) // Si no perdio evaluo para el ranking
 	{
 		system("pause");
-		ActualizarRanking(jugadorActual,leaderboard);
-		ImpresionRanking(leaderboard,idioma);
+		ActualizarRanking(jugadorActual, leaderboard);
+		ImpresionRanking(leaderboard, idioma);
 	}
-	
-	MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
-}
 
+	MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
+}
 
 //--------------------------------------------------------- JuegoPerdido -------------------------------------------------------------------
 // comprobacion de condicion de finalizacion
@@ -432,8 +431,9 @@ void DibujarAhorcado(int intentos)
 }
 
 //-------------------------------------------------------- Evaluar Parametros ------------------------------------------------------------------
-void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], int argc){
-	*debug = false; //Antes de evaluar parametros digo que debug esta desactivado
+void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], int argc)
+{
+	*debug = false; // Antes de evaluar parametros digo que debug esta desactivado
 	if (argc < 2)
 	{ // Si no tiene parametros
 		CargarDefaultABase(base);
@@ -441,7 +441,7 @@ void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], in
 	else if (argc == 2)
 	{ // Si tiene 2 parametros
 		if (strcmp(argv[1], "DEBUG") == 0)
-		{ 
+		{
 			*debug = true; // Si el segundo parametro es DEBUG se inicia modo DEBUG CON EL IDIOMA POR DEFAULT
 			CargarDefaultABase(base);
 		}
@@ -471,7 +471,6 @@ void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], in
 		system("pause");
 	}
 }
-
 
 //-------------------------------------------------------- ContarPalabras ------------------------------------------------------------------
 int ContarPalabras(char *string)
@@ -532,7 +531,7 @@ void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras)
 		fgets(string, sizeof(string), fp);
 		strcpy(aux, string);
 		*cantPalabras = ContarPalabras(aux);
-		strtok(string, "\n");	  // Elimina el salto de línea del fgets utilizando strtok
+		strtok(string, "\n");												   // Elimina el salto de línea del fgets utilizando strtok
 		idioma->palabras = (Palabra *)malloc(*cantPalabras * sizeof(Palabra)); // Calculo el tamaño contando la cantidad de palabras
 		GuardarPalabras(idioma, string);
 
@@ -590,7 +589,7 @@ void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras)
 
 		// FELICIDADES.. GANASTE!!
 		AsignarMemoria(&idioma->ganaste, fp);
-		
+
 		// ----- RANKING DE JUGADORES -----
 		AsignarMemoria(&idioma->rankingJugadores, fp);
 
@@ -660,27 +659,27 @@ void CargarDefaultABase(char *base)
 //-------------------------------------------------------------- GuardarIdioma ------------------------------------------------------------
 void GuardarIdioma(Idioma *idioma)
 {
-	FILE *dl = fopen("Idiomas/_default.dat", "r"); //Abro archivo en modo lectura para leer el idioma que esta por defecto
+	FILE *dl = fopen("Idiomas/_default.dat", "r"); // Abro archivo en modo lectura para leer el idioma que esta por defecto
 	char porDefecto[TSTRCHICO];
-	int o; //Selector de opcion
-	int tam=0; //Contador de archivos
-	char **files= malloc(10 * sizeof(char *)); // reservamos memoria para el arreglo de nombres de archivos
+	int o;										// Selector de opcion
+	int tam = 0;								// Contador de archivos
+	char **files = malloc(10 * sizeof(char *)); // reservamos memoria para el arreglo de nombres de archivos
 
 	system("cls"); // Limpio pantalla
 
-	fgets(porDefecto, sizeof(porDefecto), dl);			  // Guardo el nombre del archivo que hay en el archivo default
-	fclose(dl); // Cierro el archivo abierto en modo lectura para despues abrirlo en modo escritura
+	fgets(porDefecto, sizeof(porDefecto), dl);						  // Guardo el nombre del archivo que hay en el archivo default
+	fclose(dl);														  // Cierro el archivo abierto en modo lectura para despues abrirlo en modo escritura
 	printf("\t---- %s %s ----\n", idioma->idiomaDefecto, porDefecto); // Idioma por defecto:
 
-	LeerDirectorio(files,&tam); //Funcion de leer todos los archivos en el directorio de Idioma
-	printf("\n%s\n", idioma->idiomasDisponibles);		  // Idiomas disponibles:
+	LeerDirectorio(files, &tam);				  // Funcion de leer todos los archivos en el directorio de Idioma
+	printf("\n%s\n", idioma->idiomasDisponibles); // Idiomas disponibles:
 
-	//Imprimo los Idiomas del archivo
+	// Imprimo los Idiomas del archivo
 	for (int i = 0; i < tam; i++)
 	{
-		printf("%d. %s\n",(i+1),files[i]);
+		printf("%d. %s\n", (i + 1), files[i]);
 	}
-	
+
 	do
 	{
 		printf("\n%s %d:\n", idioma->intercambiarIdioma, tam); // Elija un idioma del 1 al n
@@ -693,14 +692,14 @@ void GuardarIdioma(Idioma *idioma)
 
 	} while (o < 1 || o > tam);
 
-	//Cargo el idioma con el nombre del archivo elegido
-	dl = fopen("Idiomas/_default.dat","w"); //Abro el archivo en modo escritura para limpiarlo del anterior
-	fputs("Idiomas/", dl); //Le agrego al contenido del archivo el directorio de los idiomas
-	fputs(files[o-1], dl); //Le agrego al archivo el nombre del idioma
-	fclose(dl); // Cierro el archivo en modo escritura
-	printf("\n%s %s\n\n", idioma->idiomaDefecto, files[o-1]); // Idioma por defecto:
+	// Cargo el idioma con el nombre del archivo elegido
+	dl = fopen("Idiomas/_default.dat", "w");					// Abro el archivo en modo escritura para limpiarlo del anterior
+	fputs("Idiomas/", dl);										// Le agrego al contenido del archivo el directorio de los idiomas
+	fputs(files[o - 1], dl);									// Le agrego al archivo el nombre del idioma
+	fclose(dl);													// Cierro el archivo en modo escritura
+	printf("\n%s %s\n\n", idioma->idiomaDefecto, files[o - 1]); // Idioma por defecto:
 
-	//LIBERO MEMORIA DE CADA NOMBRE DE ARCHIVO DE DIRECTORIO Y DEL ARREGLO DE DIRECTORIOS
+	// LIBERO MEMORIA DE CADA NOMBRE DE ARCHIVO DE DIRECTORIO Y DEL ARREGLO DE DIRECTORIOS
 	for (int i = 0; i < tam; i++)
 	{
 		free(files[i]);
@@ -711,43 +710,51 @@ void GuardarIdioma(Idioma *idioma)
 }
 
 //-------------------------------------------------------- LEER DIRECTORIO ------------------------------------------------------
-void LeerDirectorio(char **files, int *tam){
+void LeerDirectorio(char **files, int *tam)
+{
 	DIR *d = opendir("Idiomas"); // puntero a un flujo de directorio
-	struct dirent *dir; // estructura para almacenar información de cada entrada
-	
-	if (d == NULL) { // comprobamos si hubo algún error
-		fprintf(stderr,"No se pudo abrir el directorio");
-		exit(EXIT_FAILURE);
-  	}
-	
-  	int max = 10; // tamaño inicial del arreglo (En caso de que existan mas que 10 idiomas se adecua la memoria para todos)
-	
-  	if (files == NULL) { // comprobamos si hubo algún error
-    	fprintf(stderr,"No se pudo reservar memoria");
-    	exit(EXIT_FAILURE);
-  	}
+	struct dirent *dir;			 // estructura para almacenar información de cada entrada
 
-	while ((dir = readdir(d)) != NULL) { // leemos cada entrada del directorio
-		if (strcmp(dir->d_name, "_default.dat") != 0 && strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0) {// ignoramos los directorios "." , ".." y el del idioma default
-			
-			//Condicional para evaluar si hay que redimensionar la memoria reservada
-			if (max == *tam) { // si el arreglo está lleno, lo redimensionamos
-				max *= 2; // duplicamos el tamaño
+	if (d == NULL)
+	{ // comprobamos si hubo algún error
+		fprintf(stderr, "No se pudo abrir el directorio");
+		exit(EXIT_FAILURE);
+	}
+
+	int max = 10; // tamaño inicial del arreglo (En caso de que existan mas que 10 idiomas se adecua la memoria para todos)
+
+	if (files == NULL)
+	{ // comprobamos si hubo algún error
+		fprintf(stderr, "No se pudo reservar memoria");
+		exit(EXIT_FAILURE);
+	}
+
+	while ((dir = readdir(d)) != NULL)
+	{ // leemos cada entrada del directorio
+		if (strcmp(dir->d_name, "_default.dat") != 0 && strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0)
+		{ // ignoramos los directorios "." , ".." y el del idioma default
+
+			// Condicional para evaluar si hay que redimensionar la memoria reservada
+			if (max == *tam)
+			{												  // si el arreglo está lleno, lo redimensionamos
+				max *= 2;									  // duplicamos el tamaño
 				files = realloc(files, max * sizeof(char *)); // reasignamos memoria
-				if (files == NULL) { // comprobamos si hubo algún error
-					fprintf(stderr,"No se pudo reasignar memoria");
+				if (files == NULL)
+				{ // comprobamos si hubo algún error
+					fprintf(stderr, "No se pudo reasignar memoria");
 					exit(EXIT_FAILURE);
 				}
 			}
 
 			files[*tam] = malloc(strlen(dir->d_name) + 1); // reservamos memoria para cada cadena
-			if (files[*tam] == NULL) { // comprobamos si hubo algún error en esta asignacion de memoria
-				fprintf(stderr,"No se pudo reservar memoria");
+			if (files[*tam] == NULL)
+			{ // comprobamos si hubo algún error en esta asignacion de memoria
+				fprintf(stderr, "No se pudo reservar memoria");
 				exit(EXIT_FAILURE);
 			}
 
 			strcpy(files[*tam], dir->d_name); // copiamos el nombre del archivo
-			(*tam)++; // incrementamos el contador
+			(*tam)++;						  // incrementamos el contador
 		}
 	}
 	closedir(d); // cerramos el flujo de directorio
@@ -758,7 +765,7 @@ void ImpresionListaPalabras(Idioma *idioma, int *cantPalabras)
 {
 	system("cls");
 	printf("\t\t\t---- %s ----\n\n", idioma->palabrasOrdenadas); // Palabras Ordenadas por dificultad
-	
+
 	for (int i = 0; i < *cantPalabras; i++)
 	{
 		printf("%s\n", idioma->palabras[i].string);
@@ -801,31 +808,32 @@ int TieneEspacios(char *opcion)
 void OrdenamientoBurbuja(Palabra *arr, int *cantPalabras)
 {
 	Palabra aux;
-	//Ordeno las palabras por Burbuja
-	for (int i = 0; i < (*cantPalabras)-1; i++)
+	// Ordeno las palabras por Burbuja
+	for (int i = 0; i < (*cantPalabras) - 1; i++)
 	{
-		for (int j = 0; j < (*cantPalabras)-i-1; j++)
+		for (int j = 0; j < (*cantPalabras) - i - 1; j++)
 		{
-			if (arr[j].longitud>arr[j+1].longitud)
+			if (arr[j].longitud > arr[j + 1].longitud)
 			{
-				aux=arr[j];
-				arr[j]=arr[j+1];
-				arr[j+1]=aux;
+				aux = arr[j];
+				arr[j] = arr[j + 1];
+				arr[j + 1] = aux;
 			}
 		}
 	}
 }
 
 //-------------------------------------------------------- Saludo e instrucciones ------------------------------------------------------
-void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador){
+void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador)
+{
 	system("cls");
-	printf("%s ",idioma->ingresaNom); //Por favor ingresa tu nombre: 
-	scanf("%s",jugador->nombre);
+	printf("%s ", idioma->ingresaNom); // Por favor ingresa tu nombre:
+	scanf("%s", jugador->nombre);
 	system("cls");
-	printf("\n\t\t\t\t\t\t    %s %s!\n\n",idioma->bienvenido,jugador->nombre); //Bienvenido %s!
-	printf("\t\t\t\t\t\t%s\n\n",idioma->reglasJuego); //---- Reglas del juego ----
-	printf("\t%s\n",idioma->reglas1); //Tendras 6 intentos para adivinar una palabra, podes ingresar caracter a caracter o ingresar la palabra completa,
-	printf("\t\t%s\n\n\n",idioma->reglas2); //pero cuidado porque si fallas perdes automaticamente. Buena Suerte!
+	printf("\n\t\t\t\t\t\t    %s %s!\n\n", idioma->bienvenido, jugador->nombre); // Bienvenido %s!
+	printf("\t\t\t\t\t\t%s\n\n", idioma->reglasJuego);							 //---- Reglas del juego ----
+	printf("\t%s\n", idioma->reglas1);											 // Tendras 6 intentos para adivinar una palabra, podes ingresar caracter a caracter o ingresar la palabra completa,
+	printf("\t\t%s\n\n\n", idioma->reglas2);									 // pero cuidado porque si fallas perdes automaticamente. Buena Suerte!
 	system("pause");
 }
 
@@ -843,20 +851,20 @@ void LimpiezaLeaderboard(Jugador *leaderboard)
 //-------------------------------- Impresion Ranking ----------------------------
 void ImpresionRanking(Jugador *leaderboard, Idioma *idioma)
 {
-	system("cls");//Limpio pantalla
-	
-	printf("\n\t\t%s\n\n",idioma->rankingJugadores); //----- RANKING DE JUGADORES -----
-	
+	system("cls"); // Limpio pantalla
+
+	printf("\n\t\t%s\n\n", idioma->rankingJugadores); //----- RANKING DE JUGADORES -----
+
 	for (int i = 0; i < JUGADORES_MAX; i++)
 	{
 		if (strcmp(leaderboard[i].nombre, "") != 0)
 		{
-			printf("%i* - %s (%i %s %.1f %s)\n", (i + 1), leaderboard[i].nombre, leaderboard[i].intentosTotales,idioma->intentosRanking, leaderboard[i].tiempo, idioma->segundosRanking);//intentos, segundos
+			printf("%i* - %s (%i %s %.1f %s)\n", (i + 1), leaderboard[i].nombre, leaderboard[i].intentosTotales, idioma->intentosRanking, leaderboard[i].tiempo, idioma->segundosRanking); // intentos, segundos
 		}
 	}
-	
+
 	printf("\n\n");
-	system("pause"); //Espero input para continuar
+	system("pause"); // Espero input para continuar
 }
 
 //-------------------------------- Actualizar Ranking ----------------------------
@@ -865,7 +873,8 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 	int i;
 
 	// Busco la posicion del ranking en donde debo colocar en base a intentos
-	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++);
+	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++)
+		;
 
 	// Si se encuentra dentro de las primeras 10 posiciones en base a intentos analizo en base a tiempo
 	if (i < JUGADORES_MAX)
@@ -894,4 +903,52 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 			leaderboard[i].tiempo = jugador->tiempo;
 		}
 	}
+}
+// funcion para cargar el ranking desde el archivo
+void CargandoRankig(Jugador *leaderboard)
+{
+	FILE *archJugadores = fopen("Ranking.dat", "r");
+
+	char nombre[20];
+	double tiempo;
+	int intentoDB;
+	char descargar[150];
+	int eljugador = 0;
+	while (!(feof(archJugadores)))
+	{
+		(fgets(descargar, 150, archJugadores));
+		sscanf(descargar, "%[^;];%d;%lf", nombre, &intentoDB, &tiempo);
+		strcpy(leaderboard[eljugador].nombre, nombre);
+		leaderboard[eljugador].tiempo = tiempo;
+		leaderboard[eljugador].intentosTotales = intentoDB;
+		eljugador++;
+	}
+	fclose(archJugadores);
+}
+// guardar en el archivo el ranking
+void GuardarNewRankin(Jugador *leaderboard)
+{
+	FILE *archJugadores = fopen("Ranking.dat", "w");
+
+	char *cadenaAux = malloc(sizeof(char));
+
+	for (int i = 0; i < JUGADORES_MAX; i++)
+	{
+		char cargar[TSTRCHICO] = "";
+		strcpy(cargar, leaderboard[i].nombre);
+		sprintf(cadenaAux, "%d", leaderboard[i].intentosTotales);
+		strcat(cargar, ";");
+		strcat(cargar, cadenaAux);
+		strcat(cargar, ";");
+		sprintf(cadenaAux, "%.2f", leaderboard[i].tiempo);
+		strcat(cargar, cadenaAux);
+		if (i < (JUGADORES_MAX - 1))
+		{
+			strcat(cargar, "\n");
+		}
+
+		fputs(cargar, archJugadores);
+	}
+	fclose(archJugadores);
+	free(cadenaAux);
 }
