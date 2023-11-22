@@ -6,6 +6,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <unistd.h>
 
 // DEBUG por codigo
 // #define DEBUGPRINTFPROBADAS
@@ -19,6 +20,7 @@
 #define TSTRCHICO 50	 // Tamaño string chico para cargar idioma por defecto
 #define TSTRGRANDE 10000 // Tamaño string grande para la mayoria de los reservar memoria
 #define PASSWORD "123"	 // Contraseña para el modo DEBUG
+#define JUGADORES_MAX 10 // cantidad de jugadores del ranking
 
 // REGISTROS
 //Palabra
@@ -66,14 +68,14 @@ typedef struct
 typedef struct 
 {
     char nombre[TSTRCHICO];
-    int intentos;
+    int intentosRestantes;
     double tiempo;
 }Jugador;
 
 // PROTOTIPOS DE LAS FUNCIONES
 // Menues y parte grafica
-void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug);
-void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug);
+void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *leaderboard);
+void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *jugadorActual, Jugador *leaderboard);
 void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador);
 void DibujarAhorcado(int intentos);
 void MostrarLetrasProbadas(Idioma *idioma, char *letras, int intentos);
@@ -84,7 +86,6 @@ int CompararPalabras(char *palabraIngresada, char *palabraBuscada, int longitud,
 int AcertarLetra(char letra, char *palabra, int longitud, char *frase);
 int JuegoGanado(Idioma *idioma, int *cantPalabras, char *frase, int longitud, char *base, bool *debug);
 int JuegoPerdido(Idioma *idioma, int *cantPalabras, char *palabra, int intentos, char *base, bool *debug);
-void VolverAJugar(Idioma *idioma, int *cantPalabras, char *base, bool *debug);
 int TieneEspacios(char *opcion);
 void OrdenamientoBurbuja(Palabra *arr, int *cantPalabras);
 
@@ -100,10 +101,9 @@ void CargarDefaultABase(char *base);
 void LeerDirectorio(char **files, int *tam);
 
 //Ranking de jugadores
-void limpieza_leaderboard(Jugador *leaderboard);
-void altualizar_ranking(Jugador *jugador, Jugador *leaderboard);
-void impresion_ranking(Jugador *leaderboard);
-void cargar_jugador(Jugador *jugador);
+void LimpiezaLeaderboard(Jugador *leaderboard);
+void ActualizarRanking(Jugador *jugador, Jugador *leaderboard);
+void ImpresionRanking(Jugador *leaderboard);
 
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
 	Idioma *idioma = (Idioma *)malloc(sizeof(Idioma)); // Reservo memoria para el registro de idioma completo
 	int *cantPalabras = malloc(sizeof(int));           // Cantidad de palabras totales para adivinar
 	bool *debug = malloc(sizeof(bool));                //Booleano para saber si esta activado el modo DEBUG o no
+	Jugador leaderboard[JUGADORES_MAX]; //Creo el leaderboard de jugadores
+	LimpiezaLeaderboard(leaderboard); //Limpio el leaderboard por las dudas
 
 	char base[TSTRCHICO]; // Puntero para guardar el nombre del archivo del idioma
 
@@ -119,17 +121,18 @@ int main(int argc, char *argv[])
 
 	CargarIdioma(idioma, base, cantPalabras);
 
-	MenuInicio(idioma, cantPalabras, base, debug);
+	MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
 
 	return 0;
 }
 
 //------------------------------------------------------------- MenuInicio --------------------------------------------------------------
 // La funcion muestra el menu del juego y permite seleccionar una opcion
-void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
+void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *leaderboard)
 {
 	int op;
-	Jugador *jugadorActual;
+	Jugador *jugadorActual=malloc(sizeof(Jugador)); //Creo el registro del jugador actual
+	
 
 	do
 	{
@@ -139,7 +142,7 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
 		printf(" %s\n", idioma->jugar);				  // 1. JUGAR
 		printf(" %s\n", idioma->ranking);			  // 2. RANKING DE JUGADORES
 		printf(" %s\n", idioma->listPalOrd);		  // 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
-		printf(" %s\n", idioma->setIdi);			  // 4. GUARDAR IDIOMA ACTUAL COMO POR DEFECTO
+		printf(" %s\n", idioma->setIdi);			  // 4. ELEGIR IDIOMA POR DEFECTO
 		printf(" %s\n\n", idioma->salir);			  // 5. SALIR
 
 		// Validacion del ingreso de la opcion
@@ -157,22 +160,25 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
 		{
 		case 1:
 			SaludoEInstrucciones(idioma,jugadorActual);
-			EmpezarJuego(idioma, cantPalabras, base, debug);
+			EmpezarJuego(idioma, cantPalabras, base, debug, jugadorActual,leaderboard);
 			break;
 
 		case 2:
-			/* code */
+			system("cls");
+			ImpresionRanking(leaderboard);
+			system("pause");
+			MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
 			break;
 
 		case 3:
 		 	OrdenamientoBurbuja(idioma->palabras, cantPalabras);
 			ImpresionListaPalabras(idioma, cantPalabras);
-			MenuInicio(idioma, cantPalabras, base, debug);
+			MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
 			break;
 
 		case 4:
 			GuardarIdioma(idioma);
-			MenuInicio(idioma, cantPalabras, base, debug);
+			MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
 			break;
 
 		case 5:
@@ -191,14 +197,18 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
 
 //--------------------------------------------------------------- EmpezarJuego ---------------------------------------------------------------
 // Bucle del juego
-void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
+void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *jugadorActual, Jugador *leaderboard)
 {
+	srand(getpid()); // Randomizacion
+
 	int opcion, longitud, espacios;
 	int intentos = 0;
 	int cantLetrasIng = 0;
 	char letrasProbadas[INTENTOSGB + 10];
 
-	srand(time(NULL)); // Randomizacion
+	jugadorActual->tiempo = 0.0; // Inicializo el tiempo del jugador
+	clock_t inicio_cronometro = clock(); //Inicio el cronometro
+	
 
 	opcion = rand() % (*cantPalabras - 1);		  // Se genera el numero aleatorio de la palabra entre 1 y 9
 	longitud = idioma->palabras[opcion].longitud; // Se almacena el tamaño de la palabra
@@ -248,6 +258,7 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
 		// Comprueba si se gano o se perdio (se hace en este momento para que te muestre el muñeco del ahorcado o la palabra completa en pantalla)
 		if (JuegoGanado(idioma, cantPalabras, frase, longitud, base, debug) == 1)
 		{
+			jugadorActual->intentosRestantes = (INTENTOSGB-intentos); //Guardo los intentos restantes del jugador para el ranking
 			break;
 		}
 		else
@@ -283,17 +294,22 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
 		// comprobacion de finalizacion del juego
 
 	} while (intentos <= INTENTOSGB);
-	VolverAJugar(idioma, cantPalabras, base, debug);
-	printf("\n\n");
+	
+	clock_t fin_cronometro = clock(); // Termino el cronometro
+	jugadorActual->tiempo += (double)(fin_cronometro - inicio_cronometro) / CLOCKS_PER_SEC; // Calculo el tiempo y lo guardo
+
+	if (jugadorActual->intentosRestantes != 0) //Significa que no perdio
+	{
+		ActualizarRanking(jugadorActual,leaderboard);
+		system("pause");
+		system("cls");
+		ImpresionRanking(leaderboard);
+	}
+	
+	system("pause");
+	MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
 }
 
-//--------------------------------------------------------- VolverAJugar -------------------------------------------------------------------
-void VolverAJugar(Idioma *idioma, int *cantPalabras, char *base, bool *debug)
-{
-	printf(" %s", idioma->volverAJugar); // Presiona una tecla para volver a jugar..
-	getch();
-	MenuInicio(idioma, cantPalabras, base, debug);
-}
 
 //--------------------------------------------------------- JuegoPerdido -------------------------------------------------------------------
 // comprobacion de condicion de finalizacion
@@ -738,15 +754,15 @@ void ImpresionListaPalabras(Idioma *idioma, int *cantPalabras)
 {
 	system("cls");
 	printf("\t\t\t---- %s ----\n", idioma->palabrasOrdenadas); // Palabras Ordenadas por dificultad
+	
 	for (int i = 0; i < *cantPalabras; i++)
 	{
 		printf("%s\n", idioma->palabras[i].string);
-		#ifdef DEBUGMOSTRARLONGITUDPALABRAS
-		printf("\tlongitud: %d \n",idioma->palabras[i].longitud);
-		#endif
 	}
+
 	system("pause");
 }
+
 //-------------------------------------------------------- ComprobarEspacios ------------------------------------------------------
 void ComprobarEspacios(Idioma *idioma, char *opcion)
 {
@@ -775,6 +791,7 @@ int TieneEspacios(char *opcion)
 	return 0;
 }
 
+//-------------------------------------------------------- Ordenamiento Burbuja ------------------------------------------------------
 void OrdenamientoBurbuja(Palabra *arr, int *cantPalabras)
 {
 	Palabra aux;
@@ -793,6 +810,7 @@ void OrdenamientoBurbuja(Palabra *arr, int *cantPalabras)
 	}
 }
 
+//-------------------------------------------------------- Saludo e instrucciones ------------------------------------------------------
 void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador){
 	system("cls");
 	printf("%s ",idioma->ingresaNom); //Por favor ingresa tu nombre: 
@@ -803,4 +821,65 @@ void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador){
 	printf("\t%s\n",idioma->reglas1); //Tendras 6 intentos para adivinar una palabra, podes ingresar caracter a caracter o ingresar la palabra completa,
 	printf("\t\t%s\n\n\n",idioma->reglas2); //pero cuidado porque si fallas perdes automaticamente. Buena Suerte!
 	system("pause");
+}
+
+//-------------------------------------------------------- Limpieza leaderboard ------------------------------------------------------
+void LimpiezaLeaderboard(Jugador *leaderboard)
+{
+	for (int i = 0; i < JUGADORES_MAX; i++)
+	{
+		strcpy(leaderboard[i].nombre, "");
+		leaderboard[i].intentosRestantes = INTENTOSGB;
+		leaderboard[i].tiempo = 0.0;
+	}
+}
+
+//-------------------------------- Impresion Ranking ----------------------------
+void ImpresionRanking(Jugador *leaderboard)
+{
+	printf("\n\t----- RANKING DE JUGADORES -----\n");
+	for (int i = 0; i < JUGADORES_MAX; i++)
+	{
+		if (strcmp(leaderboard[i].nombre, "") != 0)
+		{
+			printf("%i* - %s (%i intentos, %.1f segundos)\n", (i + 1), leaderboard[i].nombre, leaderboard[i].intentosRestantes, leaderboard[i].tiempo);
+		}
+	}
+}
+
+//-------------------------------- Actualizar Ranking ----------------------------
+void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
+{
+	int i;
+
+	// Busco la posicion del ranking en donde debo colocar en base a intentos
+	for (i = 0; i < JUGADORES_MAX && jugador->intentosRestantes > leaderboard[i].intentosRestantes; i++);
+
+	// Si se encuentra dentro de las primeras 10 posiciones en base a intentos analizo en base a tiempo
+	if (i < JUGADORES_MAX)
+	{
+		// Mientras tengan la misma cantidad de intentos y el tiempo sea mayor
+		while (jugador->intentosRestantes == leaderboard[i].intentosRestantes && jugador->tiempo > leaderboard[i].tiempo)
+		{
+			// Incremento la posicion
+			i++;
+		}
+
+		// Si se encuentra dentro de las primeras 10 posiciones en base a tiempo acomodo para colocarlo
+		if (i < JUGADORES_MAX)
+		{
+			// Desplazamiento a la derecha
+			for (int j = JUGADORES_MAX - 1; j > i; j--)
+			{
+				leaderboard[j].intentosRestantes = leaderboard[j - 1].intentosRestantes;
+				strcpy(leaderboard[j].nombre, leaderboard[j - 1].nombre);
+				leaderboard[j].tiempo = leaderboard[j - 1].tiempo;
+			}
+
+			// Coloco el jugador en la posicion que quedo
+			leaderboard[i].intentosRestantes = jugador->intentosRestantes;
+			strcpy(leaderboard[i].nombre, jugador->nombre);
+			leaderboard[i].tiempo = jugador->tiempo;
+		}
+	}
 }
