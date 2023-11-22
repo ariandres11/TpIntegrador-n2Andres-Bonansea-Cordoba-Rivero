@@ -51,6 +51,9 @@ typedef struct
 	char *perdiste;
 	char *solEra;
 	char *ganaste;
+	char *rankingJugadores;
+	char *intentosRanking;
+	char *segundosRanking;
 	char *digiteLetra;
 	char *letProb;
 	char *despedida;
@@ -67,7 +70,7 @@ typedef struct
 typedef struct 
 {
     char nombre[TSTRCHICO];
-    int intentosRestantes;
+    int intentosTotales;
     double tiempo;
 }Jugador;
 
@@ -102,12 +105,13 @@ void LeerDirectorio(char **files, int *tam);
 //Ranking de jugadores
 void LimpiezaLeaderboard(Jugador *leaderboard);
 void ActualizarRanking(Jugador *jugador, Jugador *leaderboard);
-void ImpresionRanking(Jugador *leaderboard);
+void ImpresionRanking(Jugador *leaderboard, Idioma *idioma);
 
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
 int main(int argc, char *argv[])
 {
+	srand(getpid()); // Randomizacion
 	Idioma *idioma = (Idioma *)malloc(sizeof(Idioma)); // Reservo memoria para el registro de idioma completo
 	int *cantPalabras = malloc(sizeof(int));           // Cantidad de palabras totales para adivinar
 	bool *debug = malloc(sizeof(bool));                //Booleano para saber si esta activado el modo DEBUG o no
@@ -163,9 +167,7 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 			break;
 
 		case 2:
-			system("cls");
-			ImpresionRanking(leaderboard);
-			system("pause");
+			ImpresionRanking(leaderboard,idioma);
 			MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
 			break;
 
@@ -198,7 +200,6 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 // Bucle del juego
 void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *jugadorActual, Jugador *leaderboard)
 {
-	srand(getpid()); // Randomizacion
 
 	int opcion, longitud, espacios;
 	int intentos = 0;
@@ -257,7 +258,7 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 		// Comprueba si se gano o se perdio (se hace en este momento para que te muestre el muñeco del ahorcado o la palabra completa en pantalla)
 		if (JuegoGanado(idioma, cantPalabras, frase, longitud, base, debug) == 1)
 		{
-			jugadorActual->intentosRestantes = (INTENTOSGB-intentos); //Guardo los intentos restantes del jugador para el ranking
+			jugadorActual->intentosTotales = intentos+1; //Guardo los intentos restantes del jugador para el ranking
 			break;
 		}
 		else
@@ -297,15 +298,13 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	clock_t fin_cronometro = clock(); // Termino el cronometro
 	jugadorActual->tiempo += (double)(fin_cronometro - inicio_cronometro) / CLOCKS_PER_SEC; // Calculo el tiempo y lo guardo
 
-	if (jugadorActual->intentosRestantes != 0) //Significa que no perdio
+	if (jugadorActual->intentosTotales <= 6) //Si no perdio evaluo para el ranking
 	{
-		ActualizarRanking(jugadorActual,leaderboard);
 		system("pause");
-		system("cls");
-		ImpresionRanking(leaderboard);
+		ActualizarRanking(jugadorActual,leaderboard);
+		ImpresionRanking(leaderboard,idioma);
 	}
 	
-	system("pause");
 	MenuInicio(idioma, cantPalabras, base, debug,leaderboard);
 }
 
@@ -591,6 +590,15 @@ void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras)
 
 		// FELICIDADES.. GANASTE!!
 		AsignarMemoria(&idioma->ganaste, fp);
+		
+		// ----- RANKING DE JUGADORES -----
+		AsignarMemoria(&idioma->rankingJugadores, fp);
+
+		// intentos,
+		AsignarMemoria(&idioma->intentosRanking, fp);
+
+		// segundos
+		AsignarMemoria(&idioma->segundosRanking, fp);
 
 		// Digite una letra:
 		AsignarMemoria(&idioma->digiteLetra, fp);
@@ -690,7 +698,7 @@ void GuardarIdioma(Idioma *idioma)
 	fputs("Idiomas/", dl); //Le agrego al contenido del archivo el directorio de los idiomas
 	fputs(files[o-1], dl); //Le agrego al archivo el nombre del idioma
 	fclose(dl); // Cierro el archivo en modo escritura
-	printf("\n%s %s\n", idioma->idiomaDefecto, files[o-1]); // Idioma por defecto:
+	printf("\n%s %s\n\n", idioma->idiomaDefecto, files[o-1]); // Idioma por defecto:
 
 	//LIBERO MEMORIA DE CADA NOMBRE DE ARCHIVO DE DIRECTORIO Y DEL ARREGLO DE DIRECTORIOS
 	for (int i = 0; i < tam; i++)
@@ -749,12 +757,14 @@ void LeerDirectorio(char **files, int *tam){
 void ImpresionListaPalabras(Idioma *idioma, int *cantPalabras)
 {
 	system("cls");
-	printf("\t\t\t---- %s ----\n", idioma->palabrasOrdenadas); // Palabras Ordenadas por dificultad
+	printf("\t\t\t---- %s ----\n\n", idioma->palabrasOrdenadas); // Palabras Ordenadas por dificultad
 	
 	for (int i = 0; i < *cantPalabras; i++)
 	{
 		printf("%s\n", idioma->palabras[i].string);
 	}
+
+	printf("\n\n");
 
 	system("pause");
 }
@@ -825,22 +835,28 @@ void LimpiezaLeaderboard(Jugador *leaderboard)
 	for (int i = 0; i < JUGADORES_MAX; i++)
 	{
 		strcpy(leaderboard[i].nombre, "");
-		leaderboard[i].intentosRestantes = INTENTOSGB;
+		leaderboard[i].intentosTotales = INTENTOSGB;
 		leaderboard[i].tiempo = 0.0;
 	}
 }
 
 //-------------------------------- Impresion Ranking ----------------------------
-void ImpresionRanking(Jugador *leaderboard)
+void ImpresionRanking(Jugador *leaderboard, Idioma *idioma)
 {
-	printf("\n\t----- RANKING DE JUGADORES -----\n");
+	system("cls");//Limpio pantalla
+	
+	printf("\n\t\t%s\n\n",idioma->rankingJugadores); //----- RANKING DE JUGADORES -----
+	
 	for (int i = 0; i < JUGADORES_MAX; i++)
 	{
 		if (strcmp(leaderboard[i].nombre, "") != 0)
 		{
-			printf("%i* - %s (%i intentos, %.1f segundos)\n", (i + 1), leaderboard[i].nombre, leaderboard[i].intentosRestantes, leaderboard[i].tiempo);
+			printf("%i* - %s (%i %s %.1f %s)\n", (i + 1), leaderboard[i].nombre, leaderboard[i].intentosTotales,idioma->intentosRanking, leaderboard[i].tiempo, idioma->segundosRanking);//intentos, segundos
 		}
 	}
+	
+	printf("\n\n");
+	system("pause"); //Espero input para continuar
 }
 
 //-------------------------------- Actualizar Ranking ----------------------------
@@ -849,13 +865,13 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 	int i;
 
 	// Busco la posicion del ranking en donde debo colocar en base a intentos
-	for (i = 0; i < JUGADORES_MAX && jugador->intentosRestantes > leaderboard[i].intentosRestantes; i++);
+	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++);
 
 	// Si se encuentra dentro de las primeras 10 posiciones en base a intentos analizo en base a tiempo
 	if (i < JUGADORES_MAX)
 	{
 		// Mientras tengan la misma cantidad de intentos y el tiempo sea mayor
-		while (jugador->intentosRestantes == leaderboard[i].intentosRestantes && jugador->tiempo > leaderboard[i].tiempo)
+		while (jugador->intentosTotales == leaderboard[i].intentosTotales && jugador->tiempo > leaderboard[i].tiempo)
 		{
 			// Incremento la posicion
 			i++;
@@ -867,13 +883,13 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 			// Desplazamiento a la derecha
 			for (int j = JUGADORES_MAX - 1; j > i; j--)
 			{
-				leaderboard[j].intentosRestantes = leaderboard[j - 1].intentosRestantes;
+				leaderboard[j].intentosTotales = leaderboard[j - 1].intentosTotales;
 				strcpy(leaderboard[j].nombre, leaderboard[j - 1].nombre);
 				leaderboard[j].tiempo = leaderboard[j - 1].tiempo;
 			}
 
 			// Coloco el jugador en la posicion que quedo
-			leaderboard[i].intentosRestantes = jugador->intentosRestantes;
+			leaderboard[i].intentosTotales = jugador->intentosTotales;
 			strcpy(leaderboard[i].nombre, jugador->nombre);
 			leaderboard[i].tiempo = jugador->tiempo;
 		}
