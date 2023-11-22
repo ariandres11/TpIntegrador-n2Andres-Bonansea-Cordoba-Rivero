@@ -51,7 +51,6 @@ typedef struct
 	char *perdiste;
 	char *solEra;
 	char *ganaste;
-	char *volverAJugar;
 	char *digiteLetra;
 	char *letProb;
 	char *despedida;
@@ -592,9 +591,6 @@ void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras)
 
 		// FELICIDADES.. GANASTE!!
 		AsignarMemoria(&idioma->ganaste, fp);
-
-		// Presiona una tecla para volver al menu..
-		AsignarMemoria(&idioma->volverAJugar, fp);
 
 		// Digite una letra:
 		AsignarMemoria(&idioma->digiteLetra, fp);
