@@ -108,6 +108,9 @@ void ImpresionRanking(Jugador *leaderboard, Idioma *idioma);
 void CargarRankingDB(Jugador *leaderboard);
 void GuardarRankingDB(Jugador *leaderboard);
 
+//Funcion para DEBUG
+void DebugRanking(Jugador *leaderboard);
+
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
 int main(int argc, char *argv[])
@@ -135,50 +138,64 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 	int op;
 	Jugador *jugadorActual = malloc(sizeof(Jugador)); // Creo el registro del jugador actual
 
+	
+	system("cls");								  // Limpia la consola antes de volver a escribir
+	
+	//DEBUG
+	if (*debug)
+	{
+		printf("\n\t\t\t\t %s * DEBUG *\n\n", idioma->titulo); // JUEGO EL AHORCADO * DEBUG *
+	}else{
+		printf("\n\t\t\t\t %s \n\n", idioma->titulo); // JUEGO EL AHORCADO
+	}
+
+	printf("\t%s\n\n", idioma->menu);			  //**** MENU ****
+	printf(" %s\n", idioma->jugar);				  // 1. JUGAR
+	printf(" %s\n", idioma->ranking);			  // 2. RANKING DE JUGADORES
+	printf(" %s\n", idioma->listPalOrd);		  // 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
+	printf(" %s\n", idioma->setIdi);			  // 4. ELEGIR IDIOMA POR DEFECTO
+	printf(" %s\n\n", idioma->salir);			  // 5. SALIR
+
+	// Validacion del ingreso de la opcion
 	do
 	{
-		system("cls");								  // Limpia la consola antes de volver a escribir
-		printf("\n\t\t\t\t %s \n\n", idioma->titulo); // JUEGO EL AHORCADO
-		printf("\t%s\n\n", idioma->menu);			  //**** MENU ****
-		printf(" %s\n", idioma->jugar);				  // 1. JUGAR
-		printf(" %s\n", idioma->ranking);			  // 2. RANKING DE JUGADORES
-		printf(" %s\n", idioma->listPalOrd);		  // 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
-		printf(" %s\n", idioma->setIdi);			  // 4. ELEGIR IDIOMA POR DEFECTO
-		printf(" %s\n\n", idioma->salir);			  // 5. SALIR
-
-		// Validacion del ingreso de la opcion
-		do
+		printf(" %s ", idioma->selOP); // Seleccione una opcion:
+		scanf("%i", &op);
+		if (op < MINOP || op > MAXOP)
 		{
-			printf(" %s ", idioma->selOP); // Seleccione una opcion:
-			scanf("%i", &op);
-			if (op < MINOP || op > MAXOP)
-			{
-				printf("X %s X\n", idioma->invOP); // Opcion Invalida
-			}
-		} while (op < MINOP || op > MAXOP);
+			printf("X %s X\n", idioma->invOP); // Opcion Invalida
+		}
+	} while (op < MINOP || op > MAXOP);
 
-		switch (op)
-		{
+	//Casos del menu
+	switch (op)
+	{
 		case 1:
 			SaludoEInstrucciones(idioma, jugadorActual);
 			EmpezarJuego(idioma, cantPalabras, base, debug, jugadorActual, leaderboard);
-			break;
+		break;
 
 		case 2:
 			ImpresionRanking(leaderboard, idioma);
+			
+			//DEBUG
+			if(*debug && strcmp(leaderboard[0].nombre,"")!=0){ //Que no este vacio el leaderboard y este activado el debug
+				DebugRanking(leaderboard);
+				ImpresionRanking(leaderboard, idioma);
+			}
 			MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
-			break;
+		break;
 
 		case 3:
 			OrdenamientoBurbuja(idioma->palabras, cantPalabras);
 			ImpresionListaPalabras(idioma, cantPalabras);
 			MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
-			break;
+		break;
 
 		case 4:
 			GuardarIdioma(idioma);
 			MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
-			break;
+		break;
 
 		case 5:
 			printf("\n\n\t\t\t\t\t\t%s\n", idioma->despedida); // Gracias por jugar!!!
@@ -186,13 +203,8 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 			system("pause");
 			GuardarRankingDB(leaderboard); // Guardo el leadearboard en la DB
 			exit(EXIT_SUCCESS);
-			break;
-
-		default:
-			break;
-		}
-
-	} while (op != MAXOP);
+		break;
+	}
 }
 
 //--------------------------------------------------------------- EmpezarJuego ---------------------------------------------------------------
@@ -379,9 +391,6 @@ void MostrarLetrasProbadas(Idioma *idioma, char *letras, int intentos)
 	printf("\t %s ", idioma->letProb); // Letras probadas:
 	for (int i = 0; i < intentos; i++)
 	{
-#ifdef DEBUGPRINTF
-		printf("\ni: %d intentos: %d\n", i, intentos);
-#endif
 		printf("%c ", letras[i]);
 	}
 	printf("\n");
@@ -459,14 +468,14 @@ void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], in
 	if (*debug)
 	{
 		char input[strlen(PASSWORD)];					  // Para el input del usuario de la contraseña
-		printf("Ingrese la contrasena del modo debug: "); // EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
+		printf("\nIngrese la contrasena del modo debug: "); // EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
 		scanf("%s", input);
 		if (strcmp(PASSWORD, input) != 0)
 		{
 			fprintf(stderr, "\n\tXXXX CONTRASENA INCORRECTA XXXX\n"); // EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
 			exit(EXIT_FAILURE);
 		}
-		printf("\tMODO DEBUG CON IDIOMA DEFAULT ACTIVADO!\n\n"); // EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
+		printf("\n\tMODO DEBUG CON IDIOMA DEFAULT ACTIVADO!\n\n"); // EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
 		system("pause");
 	}
 }
@@ -932,10 +941,11 @@ void GuardarRankingDB(Jugador *leaderboard)
 
 	char *cadenaAux = malloc(sizeof(char)); //Cadena auxiliar para las conversiones de entero y flotante
 
-	//Recorro el arreglo de leaderboard completo y guardo a todos los jugadores
-	for (int i = 0; i < JUGADORES_MAX; i++)
+	//Recorro el arreglo de leaderboard completo y guardo a todos los jugadores SI EXISTEN EN ESA POSICION
+	for (int i = 0; i < JUGADORES_MAX && strcmp(leaderboard[i].nombre,"")!=0; i++)
 	{
 		char cargar[TSTRCHICO] = ""; //Declaro el string para cargar limpio de basura
+		
 		strcpy(cargar, leaderboard[i].nombre); //Copio el nombre
 		strcat(cargar, ";"); //Concateno el ;
 		sprintf(cadenaAux, "%d", leaderboard[i].intentosTotales); //Convierto los intentos del registro a string
@@ -944,14 +954,33 @@ void GuardarRankingDB(Jugador *leaderboard)
 		sprintf(cadenaAux, "%.2f", leaderboard[i].tiempo); //Convierto el tiempo del registro a string
 		strcat(cargar, cadenaAux); //Concateno el tiempo
 
-		//Para que no cargue un salto de linea en el ultimo jugador
-		if (i < (JUGADORES_MAX - 1))
+		//Para que no cargue un salto de linea en el ultimo jugador (cualquiera sea su posicion)
+		if (i < (JUGADORES_MAX - 1) && strcmp(leaderboard[i+1].nombre,"")!=0) //Miro tambien el siguiente a ver si tiene algo cargado
 		{
-			strcat(cargar, "\n");
+			strcat(cargar, "\n"); //Si no es el ultimo y el siguiente tiene algo cargado pongo un salto de linea
 		}
 		
 		fputs(cargar, DB); //Guardo la cadena en el archivo
 	}
 
 	fclose(DB); //Cierro archivo de jugadores
+}
+
+//-------------------------------- Debug Ranking ----------------------------
+void DebugRanking(Jugador *leaderboard){
+	int o;
+	do
+	{
+		printf("\n\n* DEBUG: desea borrar el ranking de jugadores (registro) (1.Si/2.No): ");
+		scanf("%d",&o);
+		if (o<1||o>2)
+		{
+			printf("\t\tXX Ingrese una opcion valida! XX\n");
+		}
+	} while (o<1||o>2);
+	
+	if (o==1)
+	{
+		LimpiezaLeaderboard(leaderboard);
+	}
 }
