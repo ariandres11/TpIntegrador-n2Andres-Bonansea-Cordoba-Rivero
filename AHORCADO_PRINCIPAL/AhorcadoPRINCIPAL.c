@@ -216,6 +216,7 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	int intentos = 0;
 	int cantLetrasIng = 0;
 	char letrasProbadas[INTENTOSGB + 10];
+	bool win=false;
 
 	jugadorActual->tiempo = 0.0;		 // Inicializo el tiempo del jugador
 	clock_t inicio_cronometro = clock(); // Inicio el cronometro
@@ -268,7 +269,8 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 		// Comprueba si se gano o se perdio (se hace en este momento para que te muestre el muñeco del ahorcado o la palabra completa en pantalla)
 		if (JuegoGanado(idioma, cantPalabras, frase, longitud, base, debug) == 1)
 		{
-			jugadorActual->intentosTotales = intentos + 1; // Guardo los intentos restantes del jugador para el ranking
+			win=true;
+			jugadorActual->intentosTotales = intentos; // Guardo los intentos restantes del jugador para el ranking
 			break;
 		}
 		else
@@ -310,7 +312,7 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 
 	system("pause"); //Pauso la consola para leer
 
-	if (jugadorActual->intentosTotales <= 6) // Si no perdio evaluo para el ranking
+	if (win) // Si no perdio evaluo para el ranking
 	{
 		ActualizarRanking(jugadorActual, leaderboard); //Actualizo el ranking (si es posible)
 		ImpresionRanking(leaderboard, idioma); //Imprimo el ranking
@@ -867,7 +869,7 @@ void ImpresionRanking(Jugador *leaderboard, Idioma *idioma)
 	{
 		if (strcmp(leaderboard[i].nombre, "") != 0)
 		{
-			printf("%i* - %s (%i %s %.1f %s)\n", (i + 1), leaderboard[i].nombre, leaderboard[i].intentosTotales, idioma->intentosRanking, leaderboard[i].tiempo, idioma->segundosRanking); // intentos, segundos
+			printf("%i* - %s (%i %s %.1f %s)\n", (i + 1), leaderboard[i].nombre, (leaderboard[i].intentosTotales+1), idioma->intentosRanking, leaderboard[i].tiempo, idioma->segundosRanking); // intentos, segundos
 		}
 	}
 
@@ -881,8 +883,7 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 	int i;
 
 	// Busco la posicion del ranking en donde debo colocar en base a intentos
-	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++)
-		;
+	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++);
 
 	// Si se encuentra dentro de las primeras 10 posiciones en base a intentos analizo en base a tiempo
 	if (i < JUGADORES_MAX)
@@ -923,13 +924,20 @@ void CargarRankingDB(Jugador *leaderboard)
 	char *nombre = malloc(sizeof(char*)); //String auxiliar para guardar el nombre del jugador en el registro
 
 	int i = 0;
-	while (!(feof(DB)))
+	
+	if (fgets(descargar, sizeof(descargar), DB) != NULL) // El archivo tiene algo
 	{
-		fgets(descargar, TSTRCHICO, DB); //Obtengo el string completo de la Base de datos sin separar
-		sscanf(descargar, "%[^;];%d;%lf", nombre, &leaderboard[i].intentosTotales, &leaderboard[i].tiempo); //Guardo nombre;intentos;tiempo en sus respectivas variables
-		strcpy(leaderboard[i].nombre, nombre); //Copio el nombre por separado pq no se le puede asignar directamente el string
-		i++; //Incremento el contador para desplazarme a la siguiente posicion del leaderboard
+		rewind(DB); //Reinicio el cursor
+		while (!(feof(DB)))
+		{
+			fgets(descargar, TSTRCHICO, DB); //Obtengo el string completo de la Base de datos sin separar
+			sscanf(descargar, "%[^;];%d;%lf", nombre, &leaderboard[i].intentosTotales, &leaderboard[i].tiempo); //Guardo nombre;intentos;tiempo en sus respectivas variables
+			strcpy(leaderboard[i].nombre, nombre); //Copio el nombre por separado pq no se le puede asignar directamente el string
+			i++; //Incremento el contador para desplazarme a la siguiente posicion del leaderboard
+		}	
 	}
+
+	
 
 	fclose(DB);//Cierro el archivo
 }
