@@ -8,7 +8,6 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <ctype.h>
 
 // DEBUG por codigo
 // #define DEBUGPRINTFPROBADAS
@@ -790,8 +789,7 @@ void ImpresionListaPalabras(Idioma *idioma, int *cantPalabras)
 		printf("%s\n", idioma->palabras[i].string);
 	}
 
-	printf("\n\n");
-
+	printf("\n");
 	system("pause");
 }
 
