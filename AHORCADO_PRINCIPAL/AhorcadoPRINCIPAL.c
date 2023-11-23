@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <ctype.h>
 
 // DEBUG por codigo
 // #define DEBUGPRINTFPROBADAS
@@ -784,6 +786,7 @@ void ImpresionListaPalabras(Idioma *idioma, int *cantPalabras)
 
 	for (int i = 0; i < *cantPalabras; i++)
 	{
+		strupr(idioma->palabras[i].string);
 		printf("%s\n", idioma->palabras[i].string);
 	}
 
