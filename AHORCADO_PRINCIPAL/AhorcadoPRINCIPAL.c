@@ -235,11 +235,13 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 			}
 		}
 		else
-		{
-			if (busquedaSecuencial(letrasProbadas, cantLetrasIng, letras[0]) == 0)
+		{ int aux = busquedaSecuencial(letrasProbadas, cantLetrasIng, letras[0]);
+			if (aux == 0)
 			{
 				letrasProbadas[cantLetrasIng] = letras[0];
 				cantLetrasIng++;
+			}else if(aux == 1){
+				intentos++;
 			}
 			if (AcertarLetra(letras[0], palabraBuscada, longitud, frase) == 0)
 			{
