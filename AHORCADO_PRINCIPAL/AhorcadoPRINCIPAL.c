@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <stdio.h>
 
 // DEBUG por codigo
 // #define DEBUGPRINTFPROBADAS
@@ -22,6 +21,25 @@
 #define TSTRGRANDE 10000 // Tamaño string grande para la mayoria de los reservar memoria
 #define PASSWORD "123"	 // Contraseña para el modo DEBUG
 #define JUGADORES_MAX 10 // cantidad de jugadores del ranking
+// Paleta de colores del texto
+#define C_RED_TX "\x1b[31m"
+#define C_GREEN_TX "\x1b[32m"
+#define C_YELLOW_TX "\x1b[33m"
+#define C_BLUE_TX "\x1b[34m"
+#define C_MAGENTA_TX "\x1b[35m"
+#define C_CYAN_TX "\x1b[36m"
+//////////////////////////////////////////////
+// Paleta de colores del fondo del texto
+#define C_BLACK_BG "\x1b[40m"
+#define C_RED_BG "\x1b[41m"
+#define C_GREEN_BG "\x1b[42m"
+#define C_YELLOW_BG "\x1b[43m"
+#define C_BLUE_BG "\x1b[44m"
+#define C_MAGENTA_BG "\x1b[45m"
+#define C_CYAN_BG "\x1b[46m"
+#define C_WHITE_BG "\x1b[47m"
+
+#define COLOR_RESET "\x1b[0m"
 
 // REGISTROS
 // Palabra
@@ -117,6 +135,8 @@ void DebugRanking(Jugador *leaderboard);
 // FUNCION PRINCIPAL MAIN
 int main(int argc, char *argv[])
 {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE);
 	srand(getpid());								   // Randomizacion
 	Idioma *idioma = (Idioma *)malloc(sizeof(Idioma)); // Reservo memoria para el registro de idioma completo
 	int *cantPalabras = malloc(sizeof(int));		   // Cantidad de palabras totales para adivinar
@@ -137,27 +157,41 @@ int main(int argc, char *argv[])
 // La funcion muestra el menu del juego y permite seleccionar una opcion
 void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *leaderboard)
 {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE);
 	int op;
 	Jugador *jugadorActual = malloc(sizeof(Jugador)); // Creo el registro del jugador actual
 
-	system("cls"); // Limpia la consola antes de volver a escribir
+	system("cls"); 
+	// Limpia la consola antes de volver a escribir
+	/*HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, BACKGROUND_CYAN);*/
+	/*printf("\033[1;31;43mEste texto es rojo con fondo amarillo\033[0m\n");
+	printf("\033[1;32;44mEste texto es verde con fondo azul\033[0m\n");
+	printf("\033[1;33;45mEste texto es amarillo con fondo magenta\033[0m\n");
+	printf("\033[1;34;46mEste texto es azul con fondo cyan\033[0m\n");
+	printf("\033[1;35;47mEste texto es magenta con fondo blanco\033[0m\n");
+	printf("\033[1;36;40mEste texto es cyan con fondo gris\033[0m\n");
+	printf("\033[1;37;41mEste texto es blanco con fondo rojo\033[0m\n");
+	printf("\033[1;30;42mEste texto es gris con fondo verde\033[0m\n");*/
 
 	// DEBUG
 	if (*debug)
 	{
-		printf("\n\t\t\t\t %s * DEBUG *\n\n", idioma->titulo); // JUEGO EL AHORCADO * DEBUG *
+		SetConsoleTextAttribute(hConsole, BACKGROUND_RED);
+		printf("\n\t\t\t\t %s * DEBUG *\n\n \033", idioma->titulo); // JUEGO EL AHORCADO * DEBUG *
 	}
 	else
 	{
-		printf("\n\t\t\t\t %s \n\n", idioma->titulo); // JUEGO EL AHORCADO
+		printf("\t\t\t\t\033[1;37;42m %s \n\n\033[0m", idioma->titulo); // JUEGO EL AHORCADO
 	}
 
-	printf("\t%s\n\n", idioma->menu);	 //**** MENU ****
-	printf(" %s\n", idioma->jugar);		 // 1. JUGAR
-	printf(" %s\n", idioma->ranking);	 // 2. RANKING DE JUGADORES
-	printf(" %s\n", idioma->listPalOrd); // 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
-	printf(" %s\n", idioma->setIdi);	 // 4. ELEGIR IDIOMA POR DEFECTO
-	printf(" %s\n\n", idioma->salir);	 // 5. SALIR
+	printf("\t\033[1;36;46m %s \033[0m\n\n", idioma->menu); //**** MENU ****
+	printf("\033[34;46m %s\033[0m\n", idioma->jugar);		// 1. JUGAR
+	printf("\033[34;46m %s\033[0m\n", idioma->ranking);		// 2. RANKING DE JUGADORES
+	printf("\033[34;46m %s\033[0m\n", idioma->listPalOrd);	// 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
+	printf("\033[34;46m %s\033[0m\n", idioma->setIdi);		// 4. ELEGIR IDIOMA POR DEFECTO
+	printf("\033[34;46m %s\033[0m\n\n", idioma->salir);		// 5. SALIR
 
 	// Validacion del ingreso de la opcion
 	do
@@ -249,7 +283,7 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	{
 		// muestra en pantalla la "interfaz" del juego
 		system("cls");
-		printf("\n\t\t\t\t%s\n\n", idioma->titulo);						// JUEGO EL AHORCADO
+		printf("\n\t\t\t\t\033[1;37;42m %s  %s\n\n \033[0m", idioma->titulo);						// JUEGO EL AHORCADO
 		printf(" %s %d \t\t", idioma->intentos, INTENTOSGB - intentos); // Intentos Disponibles:
 
 		// MODO DEBUG
@@ -412,10 +446,10 @@ void DibujarAhorcado(int intentos)
 	switch (intentos)
 	{
 	case 0:
-		printf("\n     _______\n    |       |\n    |\n    |\n    |\n    |\n    |\n ----------");
+		printf("[32m \n     _______\n    |       |\n    |\n    |\n    |\n    |\n    |\n ----------");
 		break;
 	case 1:
-		printf("\n     _______\n    |       |\n    |       0\n    |\n    |\n    |\n    |\n ----------");
+		printf("[32m \n     _______\n    |       |\n    |       0\n    |\n    |\n    |\n    |\n ----------");
 		break;
 	case 2:
 		printf("\n     _______\n    |       |\n    |       0\n    |       |\n    |\n    |\n    |\n ----------");
