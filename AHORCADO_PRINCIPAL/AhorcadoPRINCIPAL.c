@@ -3,26 +3,27 @@
 #include <time.h>
 #include <unistd.h>
 // Librerias creadas
-#include "idiomas.h"
+/* #include "idiomas.h" */
+#include "ranking.h"
 
 // Constantes
-#define INTENTOSGB 6	 // cantidad de intentos en el juego (intentos GloBales)
+/* #define INTENTOSGB 6	 // cantidad de intentos en el juego (intentos GloBales) */
 #define MINOP 1			 // numero minimo de opcion para el menu
 #define MAXOP 5			 // numero minimo de opcion para el menu
-#define JUGADORES_MAX 10 // cantidad de jugadores del ranking
+/* #define JUGADORES_MAX 10 // cantidad de jugadores del ranking */
 
 //ACA TIENEN PARA TESTEAR SUS PALABRAS CON ESPACIOS
 #define TESTPALABRASCONESPACIOS
 
 
-// REGISTROS
+/* // REGISTROS
 // Jugador
 typedef struct
 {
 	char nombre[TSTRCHICO];
 	int intentosTotales;
 	double tiempo;
-} Jugador;
+} Jugador; */
 
 // PROTOTIPOS DE LAS FUNCIONES
 // Menues y parte grafica
@@ -42,7 +43,7 @@ int busquedaSecuencial(char *arr, int longitud, char letra);
 
 void ImpresionListaPalabras(Idioma *idioma, int *cantPalabras);
 
-// Ranking de jugadores
+/* // Ranking de jugadores
 void LimpiezaLeaderboard(Jugador *leaderboard);
 void ActualizarRanking(Jugador *jugador, Jugador *leaderboard);
 void ImpresionRanking(Jugador *leaderboard, Idioma *idioma);
@@ -50,7 +51,7 @@ void CargarRankingDB(Jugador *leaderboard);
 void GuardarRankingDB(Jugador *leaderboard);
 
 // Funcion para DEBUG
-void DebugRanking(Jugador *leaderboard);
+void DebugRanking(Jugador *leaderboard); */
 
 //---------------------------------------------------------- MAIN -----------------------------------------------------------------------
 // FUNCION PRINCIPAL MAIN
@@ -453,7 +454,7 @@ void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador)
 	system("pause");
 }
 
-//-------------------------------------------------------- Limpieza leaderboard ------------------------------------------------------
+/* //-------------------------------------------------------- Limpieza leaderboard ------------------------------------------------------
 void LimpiezaLeaderboard(Jugador *leaderboard)
 {
 	for (int i = 0; i < JUGADORES_MAX; i++)
@@ -596,7 +597,7 @@ void DebugRanking(Jugador *leaderboard)
 	{
 		LimpiezaLeaderboard(leaderboard);
 	}
-}
+} */
 
 int busquedaSecuencial(char *arr, int longitud, char letra)
 {
