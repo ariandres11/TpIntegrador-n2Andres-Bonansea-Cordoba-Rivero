@@ -11,6 +11,10 @@
 #define MAXOP 5			 // numero minimo de opcion para el menu
 #define JUGADORES_MAX 10 // cantidad de jugadores del ranking
 
+//ACA TIENEN PARA TESTEAR SUS PALABRAS CON ESPACIOS
+#define TESTPALABRASCONESPACIOS
+
+
 // REGISTROS
 // Jugador
 typedef struct
@@ -150,7 +154,7 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 // Bucle del juego
 void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Jugador *jugadorActual, Jugador *leaderboard)
 {
-	int opcion, longitud, espacios;
+	int espacios;
 	int intentos = 0;
 	int cantLetrasIng = 0;
 	bool win = false;
@@ -158,15 +162,19 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	jugadorActual->tiempo = 0.0;		 // Inicializo el tiempo del jugador
 	clock_t inicio_cronometro = clock(); // Inicio el cronometro
 
-	opcion = rand() % (*cantPalabras - 1);		  // Se genera el numero aleatorio de la palabra entre 1 y 9
-	//longitud = idioma->palabras[opcion].longitud; // Se almacena el tamaño de la palabra
-	longitud = 13;
+	int opcion = rand() % (*cantPalabras - 1);		  // Se genera el numero aleatorio de la palabra entre 1 y 9
+	
+	//ACA TIENEN PARA TESTEAR SUS PALABRAS CON ESPACIOS
+	#ifdef TESTPALABRASCONESPACIOS
+		opcion = 0;
+	#endif
+	
+	int longitud = idioma->palabras[opcion].longitud; // Se almacena el tamaño de la palabra
 	char letrasProbadas[INTENTOSGB + longitud];
 	char letras[longitud];
 
-	char *palabraBuscada = "PAN CON QUESO";//strupr(idioma->palabras[opcion].string); // Se almacena la palabra Buscada (NUEVO)
+	char *palabraBuscada = strupr(idioma->palabras[opcion].string); // Se almacena la palabra Buscada (NUEVO)
 
-	
 	char frase[longitud];
 
 	//*inicializacion de los arrays
@@ -481,8 +489,7 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 	int i;
 
 	// Busco la posicion del ranking en donde debo colocar en base a intentos
-	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++)
-		;
+	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++);
 
 	// Si se encuentra dentro de las primeras 10 posiciones en base a intentos analizo en base a tiempo
 	if (i < JUGADORES_MAX)
