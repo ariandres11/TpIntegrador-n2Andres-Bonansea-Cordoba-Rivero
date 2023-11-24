@@ -2,7 +2,7 @@
 #include <conio.h>
 #include <time.h>
 #include <unistd.h>
-//Librerias creadas
+// Librerias creadas
 #include "idiomas.h"
 
 // Constantes
@@ -76,7 +76,7 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 	Jugador *jugadorActual = malloc(sizeof(Jugador)); // Creo el registro del jugador actual
 
 	system("cls"); // Limpia la consola antes de volver a escribir
-	
+
 	// DEBUG
 	if (*debug)
 	{
@@ -87,12 +87,12 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 		printf("\t\t\t\t %s \n\n", idioma->titulo); // JUEGO EL AHORCADO
 	}
 
-	printf("\t%s\n", idioma->menu); //**** MENU ****
+	printf("\t%s\n", idioma->menu);		//**** MENU ****
 	printf("%s\n", idioma->jugar);		// 1. JUGAR
-	printf("%s\n", idioma->ranking);		// 2. RANKING DE JUGADORES
-	printf("%s\n", idioma->listPalOrd);	// 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
+	printf("%s\n", idioma->ranking);	// 2. RANKING DE JUGADORES
+	printf("%s\n", idioma->listPalOrd); // 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
 	printf("%s\n", idioma->setIdi);		// 4. ELEGIR IDIOMA POR DEFECTO
-	printf("%s\n\n", idioma->salir);		// 5. SALIR
+	printf("%s\n\n", idioma->salir);	// 5. SALIR
 
 	// Validacion del ingreso de la opcion
 	do
@@ -159,15 +159,15 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	clock_t inicio_cronometro = clock(); // Inicio el cronometro
 
 	opcion = rand() % (*cantPalabras - 1);		  // Se genera el numero aleatorio de la palabra entre 1 y 9
-	longitud = idioma->palabras[opcion].longitud; // Se almacena el tamaño de la palabra
+	//longitud = idioma->palabras[opcion].longitud; // Se almacena el tamaño de la palabra
+	longitud = 13;
 	char letrasProbadas[INTENTOSGB + longitud];
 	char letras[longitud];
 
-	char *palabraBuscada = strupr(idioma->palabras[opcion].string); // Se almacena la palabra Buscada (NUEVO)
-
-	char frase[longitud];
+	char *palabraBuscada = "PAN CON QUESO";//strupr(idioma->palabras[opcion].string); // Se almacena la palabra Buscada (NUEVO)
 
 	
+	char frase[longitud];
 
 	//*inicializacion de los arrays
 	// limpieza del string de letrasProbadas
@@ -175,18 +175,25 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	{
 		letrasProbadas[i] = ' ';
 	}
-		
+
 	// se inicializa el array de caracteres frase _  para indicar la cantidad de letras a encontrar
 	for (int i = 0; i < longitud; i++)
 	{
-		frase[i] = '_';
+		if (palabraBuscada[i] == ' ')
+		{
+			frase[i] = ' ';
+		}
+		else
+		{
+			frase[i] = '_';
+		}
 	}
 
 	do
 	{
 		// muestra en pantalla la "interfaz" del juego
 		system("cls");
-		printf("\n\t\t\t\t %s \n\n", idioma->titulo); // JUEGO EL AHORCADO
+		printf("\n\t\t\t\t %s \n\n", idioma->titulo);					// JUEGO EL AHORCADO
 		printf(" %s %d \t\t", idioma->intentos, INTENTOSGB - intentos); // Intentos Disponibles:
 
 		// MODO DEBUG
@@ -235,12 +242,15 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 			}
 		}
 		else
-		{ int aux = busquedaSecuencial(letrasProbadas, cantLetrasIng, letras[0]);
+		{
+			int aux = busquedaSecuencial(letrasProbadas, cantLetrasIng, letras[0]);
 			if (aux == 0)
 			{
 				letrasProbadas[cantLetrasIng] = letras[0];
 				cantLetrasIng++;
-			}else if(aux == 1){
+			}
+			else if (aux == 1)
+			{
 				intentos++;
 			}
 			if (AcertarLetra(letras[0], palabraBuscada, longitud, frase) == 0)
