@@ -8,22 +8,24 @@
 
 // Constantes
 /* #define INTENTOSGB 6	 // cantidad de intentos en el juego (intentos GloBales) */
-#define MINOP 1			 // numero minimo de opcion para el menu
-#define MAXOP 5			 // numero minimo de opcion para el menu
-/* #define JUGADORES_MAX 10 // cantidad de jugadores del ranking */
+#define MINOP 1 // numero minimo de opcion para el menu
+#define MAXOP 5 // numero minimo de opcion para el menu
 
-//ACA TIENEN PARA TESTEAR SUS PALABRAS CON ESPACIOS
-#define TESTPALABRASCONESPACIOS
-
-
-/* // REGISTROS
-// Jugador
-typedef struct
-{
-	char nombre[TSTRCHICO];
-	int intentosTotales;
-	double tiempo;
-} Jugador; */
+//Paleta de colores
+#define AZUL 1
+#define VERDE 2
+#define CIAN 3
+#define ROJO 4
+#define MAGENTA 5
+#define AMARILLO 6
+#define BLANCO 7
+#define GRIS 8
+#define AZUL_CLARO 9
+#define VERDE_CLARO 10
+#define CIAN_CLARO 11
+#define ROJO_CLARO 12
+#define AMARILLO_CLARO 13
+#define BLANCO_BLANCO 14
 
 // PROTOTIPOS DE LAS FUNCIONES
 // Menues y parte grafica
@@ -42,6 +44,9 @@ void OrdenamientoBurbuja(Palabra *arr, int *cantPalabras);
 int busquedaSecuencial(char *arr, int longitud, char letra);
 
 void ImpresionListaPalabras(Idioma *idioma, int *cantPalabras);
+
+// Colores
+void setColor(int color);
 
 /* // Ranking de jugadores
 void LimpiezaLeaderboard(Jugador *leaderboard);
@@ -81,7 +86,7 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 	Jugador *jugadorActual = malloc(sizeof(Jugador)); // Creo el registro del jugador actual
 
 	system("cls"); // Limpia la consola antes de volver a escribir
-
+	setColor(MAGENTA);
 	// DEBUG
 	if (*debug)
 	{
@@ -91,17 +96,20 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 	{
 		printf("\t\t\t\t %s \n\n", idioma->titulo); // JUEGO EL AHORCADO
 	}
-
-	printf("\t%s\n", idioma->menu);		//**** MENU ****
+	setColor(MAGENTA);
+	printf("\t%s\n", idioma->menu); //**** MENU ****
+	setColor(CIAN);
 	printf("%s\n", idioma->jugar);		// 1. JUGAR
 	printf("%s\n", idioma->ranking);	// 2. RANKING DE JUGADORES
 	printf("%s\n", idioma->listPalOrd); // 3. MOSTRAR LISTA DE PALABRAS ORDENADA POR DIFICULTAD (LONGITUD)
 	printf("%s\n", idioma->setIdi);		// 4. ELEGIR IDIOMA POR DEFECTO
 	printf("%s\n\n", idioma->salir);	// 5. SALIR
+	setColor(BLANCO);
 
 	// Validacion del ingreso de la opcion
 	do
 	{
+		setColor(BLANCO);
 		printf(" %s ", idioma->selOP); // Seleccione una opcion:
 		scanf("%i", &op);
 		if (op < MINOP || op > MAXOP)
@@ -119,14 +127,16 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 		break;
 
 	case 2:
+		setColor(AZUL_CLARO);
 		ImpresionRanking(leaderboard, idioma);
-
 		// DEBUG
 		if (*debug && strcmp(leaderboard[0].nombre, "") != 0)
 		{ // Que no este vacio el leaderboard y este activado el debug
 			DebugRanking(leaderboard);
 			ImpresionRanking(leaderboard, idioma);
 		}
+		setColor(BLANCO);
+
 		MenuInicio(idioma, cantPalabras, base, debug, leaderboard);
 		break;
 
@@ -142,8 +152,10 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 		break;
 
 	case 5:
+		setColor(CIAN_CLARO);
 		printf("\n\n\t\t\t\t\t\t%s\n", idioma->despedida); // Gracias por jugar!!!
-		printf("\n\t**** %s ****\n\n", idioma->creditos);  // creditos
+		setColor(BLANCO);
+		printf("\n\t**** %s ****\n\n", idioma->creditos); // creditos
 		system("pause");
 		GuardarRankingDB(leaderboard); // Guardo el leadearboard en la DB
 		exit(EXIT_SUCCESS);
@@ -163,13 +175,10 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	jugadorActual->tiempo = 0.0;		 // Inicializo el tiempo del jugador
 	clock_t inicio_cronometro = clock(); // Inicio el cronometro
 
-	int opcion = rand() % (*cantPalabras - 1);		  // Se genera el numero aleatorio de la palabra entre 1 y 9
-	
-	//ACA TIENEN PARA TESTEAR SUS PALABRAS CON ESPACIOS
-	#ifdef TESTPALABRASCONESPACIOS
-		opcion = 0;
-	#endif
-	
+	int opcion = rand() % (*cantPalabras - 1); // Se genera el numero aleatorio de la palabra entre 1 y 9
+
+	// ACA TIENEN PARA TESTEAR SUS PALABRAS CON ESPACIOS
+
 	int longitud = idioma->palabras[opcion].longitud; // Se almacena el tamaño de la palabra
 	char letrasProbadas[INTENTOSGB + longitud];
 	char letras[longitud];
@@ -202,13 +211,17 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 	{
 		// muestra en pantalla la "interfaz" del juego
 		system("cls");
-		printf("\n\t\t\t\t %s \n\n", idioma->titulo);					// JUEGO EL AHORCADO
+		setColor(MAGENTA);
+		printf("\n\t\t\t\t %s \n\n", idioma->titulo);
+		setColor(CIAN);													// JUEGO EL AHORCADO
 		printf(" %s %d \t\t", idioma->intentos, INTENTOSGB - intentos); // Intentos Disponibles:
 
 		// MODO DEBUG
 		if (*debug)
 		{
+			setColor(GRIS);
 			printf("Palabra a buscar: %s", idioma->palabras[opcion].string); // EL MODO DEBUG SIEMPRE SE IMPRIME EN ESPAÑOL
+			setColor(BLANCO);
 		}
 
 		if (cantLetrasIng > 0)
@@ -237,9 +250,9 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 				break;
 			}
 		}
-
+		setColor(BLANCO);
 		printf("\n\n %s ", idioma->digiteLetra); // Digite una letra:
-		scanf("%s", &letras);
+		scanf(" %[^\n]s", &letras);
 		strcpy(letras, strupr(letras)); // pasa las letras que estan en minuscula a mayuscula para que la comparacion sea efectiva
 
 		// comprobacion de acierto de letra o palabra completa
@@ -292,8 +305,10 @@ int JuegoPerdido(Idioma *idioma, int *cantPalabras, char *palabra, int intentos,
 {
 	if (intentos == INTENTOSGB)
 	{
+		setColor(ROJO);
 		printf("\n\n %s\n", idioma->perdiste);		   // PERDISTE!!
 		printf(" %s %s\n\n", idioma->solEra, palabra); // LA SOLUCION ERA:
+		setColor(BLANCO);
 		return 1;
 	}
 	return 0;
@@ -313,7 +328,9 @@ int JuegoGanado(Idioma *idioma, int *cantPalabras, char *frase, int longitud, ch
 
 	if (espacios == 0)
 	{
+		setColor(VERDE);
 		printf("\n %s\n\n", idioma->ganaste); // FELICIDADES.. GANASTE!!
+		setColor(BLANCO);
 		return 1;
 	}
 
@@ -370,30 +387,43 @@ void DibujarAhorcado(int intentos)
 	switch (intentos)
 	{
 	case 0:
+		setColor(VERDE);
 		printf("\n     _______\n    |       |\n    |\n    |\n    |\n    |\n    |\n ----------");
-		break;
+		setColor(BLANCO);
+	break;
 	case 1:
+		setColor(VERDE);
 		printf("\n     _______\n    |       |\n    |       0\n    |\n    |\n    |\n    |\n ----------");
-		break;
+		setColor(BLANCO);
+	break;
 	case 2:
+		setColor(AMARILLO);
 		printf("\n     _______\n    |       |\n    |       0\n    |       |\n    |\n    |\n    |\n ----------");
-		break;
+		setColor(BLANCO);
+	break;
 	case 3:
+		setColor(AMARILLO);
 		printf("\n     _______\n    |       |\n    |       0\n    |      /|\n    |\n    |\n    |\n ----------");
-		break;
+		setColor(BLANCO);
+	break;
 	case 4:
+		setColor(ROJO);
 		printf("\n     _______\n    |       |\n    |       0\n    |      /|");
 		printf("\\");
 		printf("\n");
 		printf("    |\n    |\n    |\n ----------");
-		break;
+		setColor(BLANCO);	
+	break;
 	case 5:
+		setColor(ROJO);
 		printf("\n     _______\n    |       |\n    |       0\n    |      /|");
 		printf("\\");
 		printf("\n");
 		printf("    |      /\n    |\n    |\n ----------");
-		break;
+		setColor(BLANCO);
+	break;
 	case 6:
+		setColor(ROJO);
 		printf("\n     _______\n    |       |\n    |       0\n    |      /|");
 		printf("\\");
 		printf("\n");
@@ -401,8 +431,9 @@ void DibujarAhorcado(int intentos)
 		printf("\\");
 		printf("\n");
 		printf("    |\n    |\n ----------");
-		break;
-	}
+		setColor(BLANCO);
+	break;
+}
 }
 
 //-------------------------------------------------------- ImpresionListaPalabras ------------------------------------------------------
@@ -447,157 +478,14 @@ void SaludoEInstrucciones(Idioma *idioma, Jugador *jugador)
 	printf("%s ", idioma->ingresaNom); // Por favor ingresa tu nombre:
 	scanf("%s", jugador->nombre);
 	system("cls");
+	setColor(CIAN_CLARO);
 	printf("\n\t\t\t\t\t\t    %s %s!\n\n", idioma->bienvenido, jugador->nombre); // Bienvenido %s!
-	printf("\t\t\t\t\t\t%s\n\n", idioma->reglasJuego);							 //---- Reglas del juego ----
-	printf("\t%s\n", idioma->reglas1);											 // Tendras 6 intentos para adivinar una palabra, podes ingresar caracter a caracter o ingresar la palabra completa,
-	printf("\t\t%s\n\n\n", idioma->reglas2);									 // pero cuidado porque si fallas perdes automaticamente. Buena Suerte!
+	setColor(BLANCO);
+	printf("\t\t\t\t\t\t%s\n\n", idioma->reglasJuego); //---- Reglas del juego ----
+	printf("\t%s\n", idioma->reglas1);				   // Tendras 6 intentos para adivinar una palabra, podes ingresar caracter a caracter o ingresar la palabra completa,
+	printf("\t\t%s\n\n\n", idioma->reglas2);		   // pero cuidado porque si fallas perdes automaticamente. Buena Suerte!
 	system("pause");
 }
-
-/* //-------------------------------------------------------- Limpieza leaderboard ------------------------------------------------------
-void LimpiezaLeaderboard(Jugador *leaderboard)
-{
-	for (int i = 0; i < JUGADORES_MAX; i++)
-	{
-		strcpy(leaderboard[i].nombre, "");
-		leaderboard[i].intentosTotales = INTENTOSGB;
-		leaderboard[i].tiempo = 0.0;
-	}
-}
-
-//-------------------------------- Impresion Ranking ----------------------------
-void ImpresionRanking(Jugador *leaderboard, Idioma *idioma)
-{
-	system("cls"); // Limpio pantalla
-
-	printf("\n\t\t%s\n\n", idioma->rankingJugadores); //----- RANKING DE JUGADORES -----
-
-	for (int i = 0; i < JUGADORES_MAX; i++)
-	{
-		if (strcmp(leaderboard[i].nombre, "") != 0)
-		{
-			printf("%i* - %s (%i %s %.1f %s)\n", (i + 1), leaderboard[i].nombre, (leaderboard[i].intentosTotales + 1), idioma->intentosRanking, leaderboard[i].tiempo, idioma->segundosRanking); // intentos, segundos
-		}
-	}
-
-	printf("\n\n");
-	system("pause"); // Espero input para continuar
-}
-
-//-------------------------------- Actualizar Ranking ----------------------------
-void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
-{
-	int i;
-
-	// Busco la posicion del ranking en donde debo colocar en base a intentos
-	for (i = 0; i < JUGADORES_MAX && jugador->intentosTotales > leaderboard[i].intentosTotales; i++);
-
-	// Si se encuentra dentro de las primeras 10 posiciones en base a intentos analizo en base a tiempo
-	if (i < JUGADORES_MAX)
-	{
-		// Mientras tengan la misma cantidad de intentos y el tiempo sea mayor
-		while (jugador->intentosTotales == leaderboard[i].intentosTotales && jugador->tiempo > leaderboard[i].tiempo)
-		{
-			// Incremento la posicion
-			i++;
-		}
-
-		// Si se encuentra dentro de las primeras 10 posiciones en base a tiempo acomodo para colocarlo
-		if (i < JUGADORES_MAX)
-		{
-			// Desplazamiento a la derecha
-			for (int j = JUGADORES_MAX - 1; j > i; j--)
-			{
-				leaderboard[j].intentosTotales = leaderboard[j - 1].intentosTotales;
-				strcpy(leaderboard[j].nombre, leaderboard[j - 1].nombre);
-				leaderboard[j].tiempo = leaderboard[j - 1].tiempo;
-			}
-
-			// Coloco el jugador en la posicion que quedo
-			leaderboard[i].intentosTotales = jugador->intentosTotales;
-			strcpy(leaderboard[i].nombre, jugador->nombre);
-			leaderboard[i].tiempo = jugador->tiempo;
-		}
-	}
-}
-
-//-------------------------------- Cargar RankingDB ----------------------------
-void CargarRankingDB(Jugador *leaderboard)
-{
-	FILE *DB = fopen("_RankingDB.dat", "r");
-
-	char *descargar = malloc(sizeof(char *)); // String para obtener una linea de 1 jugador
-
-	char *nombre = malloc(sizeof(char *)); // String auxiliar para guardar el nombre del jugador en el registro
-
-	int i = 0;
-
-	if (fgets(descargar, sizeof(descargar), DB) != NULL) // El archivo tiene algo
-	{
-		rewind(DB); // Reinicio el cursor
-		while (!(feof(DB)))
-		{
-			fgets(descargar, TSTRCHICO, DB);																	// Obtengo el string completo de la Base de datos sin separar
-			sscanf(descargar, "%[^;];%d;%lf", nombre, &leaderboard[i].intentosTotales, &leaderboard[i].tiempo); // Guardo nombre;intentos;tiempo en sus respectivas variables
-			strcpy(leaderboard[i].nombre, nombre);																// Copio el nombre por separado pq no se le puede asignar directamente el string
-			i++;																								// Incremento el contador para desplazarme a la siguiente posicion del leaderboard
-		}
-	}
-
-	fclose(DB); // Cierro el archivo
-}
-
-//-------------------------------- Guardar RankingDB ----------------------------
-void GuardarRankingDB(Jugador *leaderboard)
-{
-	FILE *DB = fopen("_RankingDB.dat", "w");
-
-	char *cadenaAux = malloc(sizeof(char)); // Cadena auxiliar para las conversiones de entero y flotante
-
-	// Recorro el arreglo de leaderboard completo y guardo a todos los jugadores SI EXISTEN EN ESA POSICION
-	for (int i = 0; i < JUGADORES_MAX && strcmp(leaderboard[i].nombre, "") != 0; i++)
-	{
-		char cargar[TSTRCHICO] = ""; // Declaro el string para cargar limpio de basura
-
-		strcpy(cargar, leaderboard[i].nombre);					  // Copio el nombre
-		strcat(cargar, ";");									  // Concateno el ;
-		sprintf(cadenaAux, "%d", leaderboard[i].intentosTotales); // Convierto los intentos del registro a string
-		strcat(cargar, cadenaAux);								  // Concateno los intentos
-		strcat(cargar, ";");									  // Concateno el ;
-		sprintf(cadenaAux, "%.2f", leaderboard[i].tiempo);		  // Convierto el tiempo del registro a string
-		strcat(cargar, cadenaAux);								  // Concateno el tiempo
-
-		// Para que no cargue un salto de linea en el ultimo jugador (cualquiera sea su posicion)
-		if (i < (JUGADORES_MAX - 1) && strcmp(leaderboard[i + 1].nombre, "") != 0) // Miro tambien el siguiente a ver si tiene algo cargado
-		{
-			strcat(cargar, "\n"); // Si no es el ultimo y el siguiente tiene algo cargado pongo un salto de linea
-		}
-
-		fputs(cargar, DB); // Guardo la cadena en el archivo
-	}
-
-	fclose(DB); // Cierro archivo de jugadores
-}
-
-//-------------------------------- Debug Ranking ----------------------------
-void DebugRanking(Jugador *leaderboard)
-{
-	int o;
-	do
-	{
-		printf("\n\n* DEBUG: desea borrar el ranking de jugadores (registro) (1.Si/2.No): ");
-		scanf("%d", &o);
-		if (o < 1 || o > 2)
-		{
-			printf("\t\tXX Ingrese una opcion valida! XX\n");
-		}
-	} while (o < 1 || o > 2);
-
-	if (o == 1)
-	{
-		LimpiezaLeaderboard(leaderboard);
-	}
-} */
 
 int busquedaSecuencial(char *arr, int longitud, char letra)
 {
@@ -609,4 +497,9 @@ int busquedaSecuencial(char *arr, int longitud, char letra)
 		}
 	}
 	return 0; // Retorna 0 si el elemento no está en el array
+}
+
+void setColor(int color)
+{
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
