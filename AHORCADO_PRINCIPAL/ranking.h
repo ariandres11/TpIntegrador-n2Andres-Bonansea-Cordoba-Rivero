@@ -21,6 +21,7 @@ void CargarRankingDB(Jugador *leaderboard);
 void GuardarRankingDB(Jugador *leaderboard);
 int JugadorExistente(Jugador *jugador, Jugador *leaderboard);
 bool LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard, int *posicionJugador);
+void AcomodarJugadoresExistentes(Jugador *jugador, Jugador *leaderboard, int *posicionJugador);
 
 // Funcion para DEBUG
 void DebugRanking(Jugador *leaderboard);

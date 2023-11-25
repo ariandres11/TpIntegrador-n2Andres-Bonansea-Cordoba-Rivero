@@ -162,6 +162,20 @@ int JugadorExistente(Jugador *jugador, Jugador *leaderboard)
 
 }
 
+//-------------------------------- Acomodar Jugadores Existentes ----------------------------
+//Funcion que acomoda a los jugadores existentes luego de que se acomode un jugador con mismo nombre y mejor puntaje
+void AcomodarJugadoresExistentes(Jugador *jugador, Jugador *leaderboard, int *posicionJugador){
+	if (*posicionJugador < JUGADORES_MAX-1) //La posicion del jugador no es la ultima del arreglo
+	{
+		//Recorro desde la posicion encontrada hasta el final y los desplazo a todos una posicion adelante
+		for (int i = *posicionJugador; i < JUGADORES_MAX-1; i++)
+		{
+			leaderboard[i] = leaderboard[i+1]; 
+		}
+	}
+}
+
+
 //-------------------------------- Actualizar Jugador Existente ----------------------------
 //Funcion que limpia o no las estadisticas del jugador en el leaderboard en caso de que se encuentre y las mismas sean inferiores
 bool LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard, int *posicionJugador){ 
@@ -170,17 +184,14 @@ bool LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard, int *po
 	{
 		if (jugador->intentosTotales<leaderboard[*posicionJugador].intentosTotales) //Si la cantidad de intentos nueva es menor
 		{
-			//limpio el jugador del leaderboard
-			strcpy(leaderboard[*posicionJugador].nombre, "");
-			leaderboard[*posicionJugador].intentosTotales = INTENTOSGB;
-			leaderboard[*posicionJugador].tiempo = 0.0;
+			AcomodarJugadoresExistentes(jugador, leaderboard, posicionJugador);
+			
 			return true; //Devuelvo que el jugador fue modificado
 
-		}else if(jugador->intentosTotales == leaderboard[*posicionJugador].intentosTotales && jugador->tiempo<leaderboard[*posicionJugador].tiempo){ //Si la cantidad de intentos es igual pero el tiempo es menor
-			//limpio el jugador del leaderboard
-			strcpy(leaderboard[*posicionJugador].nombre, "");
-			leaderboard[*posicionJugador].intentosTotales = INTENTOSGB;
-			leaderboard[*posicionJugador].tiempo = 0.0;
+		}else if(jugador->intentosTotales == leaderboard[*posicionJugador].intentosTotales && jugador->tiempo<leaderboard[*posicionJugador].tiempo) //Si la cantidad de intentos es igual pero el tiempo es menor
+		{ 
+			AcomodarJugadoresExistentes(jugador, leaderboard, posicionJugador);
+			
 			return true; //Devuelvo que el jugador fue modificado
 
 		}
