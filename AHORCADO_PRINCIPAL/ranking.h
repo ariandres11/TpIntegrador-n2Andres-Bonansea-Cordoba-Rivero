@@ -20,7 +20,7 @@ void ImpresionRanking(Jugador *leaderboard, Idioma *idioma);
 void CargarRankingDB(Jugador *leaderboard);
 void GuardarRankingDB(Jugador *leaderboard);
 int JugadorExistente(Jugador *jugador, Jugador *leaderboard);
-void LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard);
+bool LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard, int *posicionJugador);
 
 // Funcion para DEBUG
 void DebugRanking(Jugador *leaderboard);

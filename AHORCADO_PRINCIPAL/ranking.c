@@ -164,26 +164,28 @@ int JugadorExistente(Jugador *jugador, Jugador *leaderboard)
 
 //-------------------------------- Actualizar Jugador Existente ----------------------------
 //Funcion que limpia o no las estadisticas del jugador en el leaderboard en caso de que se encuentre y las mismas sean inferiores
-void LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard){
-	
-	int posicionJugador = JugadorExistente(jugador,leaderboard);
+bool LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard, int *posicionJugador){ 
 
-	if (posicionJugador != -1)//El jugador ya se encontraba en el leaderboard
+	if (*posicionJugador != -1)//El jugador ya se encontraba en el leaderboard
 	{
-		if (jugador->intentosTotales<leaderboard[posicionJugador].intentosTotales) //Si la cantidad de intentos nueva es menor
+		if (jugador->intentosTotales<leaderboard[*posicionJugador].intentosTotales) //Si la cantidad de intentos nueva es menor
 		{
 			//limpio el jugador del leaderboard
-			strcpy(leaderboard[posicionJugador].nombre, "");
-			leaderboard[posicionJugador].intentosTotales = INTENTOSGB;
-			leaderboard[posicionJugador].tiempo = 0.0;
+			strcpy(leaderboard[*posicionJugador].nombre, "");
+			leaderboard[*posicionJugador].intentosTotales = INTENTOSGB;
+			leaderboard[*posicionJugador].tiempo = 0.0;
+			return true; //Devuelvo que el jugador fue modificado
 
-		}else if(jugador->intentosTotales == leaderboard[posicionJugador].intentosTotales && jugador->tiempo<leaderboard[posicionJugador].tiempo){ //Si la cantidad de intentos es igual pero el tiempo es menor
+		}else if(jugador->intentosTotales == leaderboard[*posicionJugador].intentosTotales && jugador->tiempo<leaderboard[*posicionJugador].tiempo){ //Si la cantidad de intentos es igual pero el tiempo es menor
 			//limpio el jugador del leaderboard
-			strcpy(leaderboard[posicionJugador].nombre, "");
-			leaderboard[posicionJugador].intentosTotales = INTENTOSGB;
-			leaderboard[posicionJugador].tiempo = 0.0;
+			strcpy(leaderboard[*posicionJugador].nombre, "");
+			leaderboard[*posicionJugador].intentosTotales = INTENTOSGB;
+			leaderboard[*posicionJugador].tiempo = 0.0;
+			return true; //Devuelvo que el jugador fue modificado
+
 		}
 	}
+	return false; //Devuelvo que el jugador NO fue modificado
 }
 
 //-------------------------------- Debug Ranking ----------------------------

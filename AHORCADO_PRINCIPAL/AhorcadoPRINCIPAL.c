@@ -265,8 +265,18 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 
 	if (win) // Si gano evaluo para el ranking
 	{
-		LimpiarJugadorExistentePeor(jugadorActual,leaderboard);
-		ActualizarRanking(jugadorActual, leaderboard); // Actualizo el ranking (si es posible)
+		bool esMejor = false; // Variable para saber si el jugador actual es mejor que el del leaderboard
+		int posicionJugador = JugadorExistente(jugadorActual,leaderboard); //Variable de la posicion del jugador
+		if (posicionJugador != -1) //El jugador ya exisita previamente (se encontro)
+		{
+			esMejor = LimpiarJugadorExistentePeor(jugadorActual,leaderboard,&posicionJugador); //Si el jugador actual es igual y tiene mejor puntaje
+		}
+
+		if (esMejor || posicionJugador == -1) // Si el jugador nuevo es mejor (se encontro y tiene mejor puntaje) o si el jugador no se encuentra registrado previamente
+		{
+			ActualizarRanking(jugadorActual, leaderboard); // Actualizo el ranking (si es posible)
+		}
+		
 		ImpresionRanking(leaderboard, idioma);		   // Imprimo el ranking
 	}
 
