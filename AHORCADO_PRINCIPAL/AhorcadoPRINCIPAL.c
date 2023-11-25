@@ -66,7 +66,9 @@ void MenuInicio(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Juga
 	}
 	else
 	{
+		setColor(MAGENTA);
 		printf("\t\t\t\t %s \n\n", idioma->titulo); // JUEGO EL AHORCADO
+		setColor(GRIS);
 	}
 	setColor(MAGENTA);
 	printf("\t%s\n", idioma->menu); //**** MENU ****
@@ -222,6 +224,8 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 				break;
 			}
 		}
+
+		
 		setColor(BLANCO);
 		printf("\n\n %s ", idioma->digiteLetra); // Digite una letra:
 		scanf(" %[^\n]s", &letras); //Para que se puedan ingresar palabras con espacios
@@ -237,23 +241,20 @@ void EmpezarJuego(Idioma *idioma, int *cantPalabras, char *base, bool *debug, Ju
 		}
 		else
 		{
-			int aux = busquedaSecuencial(letrasProbadas, cantLetrasIng, letras[0]);
-			if (aux == 0)
+			//guarda si la letra se encontro (1) o no (0) en la busqueda secuencial
+			int busquedaCheck = busquedaSecuencial(letrasProbadas, cantLetrasIng, letras[0]);
+			//si no se encontro en la busqueda secuncial lo agrega a letras probadas
+			if (busquedaCheck == 0)
 			{
 				letrasProbadas[cantLetrasIng] = letras[0];
-				cantLetrasIng++;
+				cantLetrasIng++; // incrementa cuantos elementos tiene letras probadas
 			}
-			else if (aux == 1)
-			{
-				intentos++;
-			}
-			if (AcertarLetra(letras[0], palabraBuscada, longitud, frase) == 0)
+			// si la letra no se encuentra en la palabra a buscar devuelve 0 o si se encontra en letras probadas
+			if ((AcertarLetra(letras[0], palabraBuscada, longitud, frase) == 0) || (busquedaCheck == 1))
 			{
 				intentos++;
 			}
 		}
-
-		// comprobacion de finalizacion del juego
 
 	} while (intentos <= INTENTOSGB);
 
