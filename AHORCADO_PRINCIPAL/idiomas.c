@@ -1,6 +1,7 @@
 #include "idiomas.h"
 
 //-------------------------------------------------------- Evaluar Parametros ------------------------------------------------------------------
+//Evalua los parametros recibidos al ejecutar el juego para saber en que modo inicializar el idioma
 void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], int argc)
 {
 	*debug = false; // Antes de evaluar parametros digo que debug esta desactivado
@@ -30,6 +31,7 @@ void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], in
 	if (*debug)
 	{
 		char input[strlen(PASSWORD)];						// Para el input del usuario de la contraseña
+		setColor(GRIS);
 		printf("\nIngrese la contrasena del modo debug: "); // EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
 		scanf("%s", input);
 		if (strcmp(PASSWORD, input) != 0)
@@ -38,11 +40,13 @@ void EvaluarParametros(Idioma *idioma, char *base, bool *debug, char *argv[], in
 			exit(EXIT_FAILURE);
 		}
 		printf("\n\tMODO DEBUG CON IDIOMA DEFAULT ACTIVADO!\n\n"); // EL MODO DEBUG SIEMPRE SE EJECUTA EN ESPAÑOL
+		setColor(BLANCO);
 		system("pause");
 	}
 }
 
-//-------------------------------------------------------- ContarPalabras ------------------------------------------------------------------
+//-------------------------------------------------------- Contar Palabras ------------------------------------------------------------------
+//Cuenta la cantidad de palabras introducidas en el archivo de idioma elegido
 int ContarPalabras(char *string)
 {
 	int cont = 0;
@@ -55,7 +59,8 @@ int ContarPalabras(char *string)
 	return cont;
 }
 
-//------------------------------------------------------- GuardarPalabras --------------------------------------------------------------------
+//------------------------------------------------------- Guardar Palabras --------------------------------------------------------------------
+//Guarda las palabras del archivo de idioma elegido en un arreglo de palabras
 void GuardarPalabras(Idioma *idioma, char *string)
 {
 	int cont = 0;
@@ -69,7 +74,8 @@ void GuardarPalabras(Idioma *idioma, char *string)
 	}
 }
 
-//-------------------------------------------------------- CargarIdioma --------------------------------------------------------------
+//-------------------------------------------------------- Cargar Idioma --------------------------------------------------------------
+//Carga el registro de idioma con todos los strings del archivo de idioma
 void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras)
 {
 	FILE *fp;
@@ -201,7 +207,8 @@ void CargarIdioma(Idioma *idioma, char *nombreArchivo, int *cantPalabras)
 	fclose(fp);
 }
 
-//------------------------------------------------------------- AsignarMemoria -------------------------------------------------------------
+//------------------------------------------------------------- Asignar Memoria -------------------------------------------------------------
+//Reserva la memoria suficiente para cada string del registro de idioma
 void AsignarMemoria(char **puntero, FILE *fp)
 {
 	char string[TSTRGRANDE];
@@ -217,29 +224,50 @@ void AsignarMemoria(char **puntero, FILE *fp)
 	strcpy(*puntero, string); // Finalmente copio el string al registro
 }
 
-//-------------------------------------------------------- CargarDefaultABase ------------------------------------------------------
+//-------------------------------------------------------- Cargar Default A Base ------------------------------------------------------
+//Carga el idioma del archivo default al string base
 void CargarDefaultABase(char *base)
 {
 	// Busco el nombre del archivo default a leer en el archivo default
 	FILE *dl = fopen("Idiomas/_default.dat", "r");
+	
+	// Error al abrir el archivo
+	if (dl == NULL)
+	{
+		fprintf(stderr, "No se pudo abrir correctamente el archivo Idiomas/_default.dat\n");
+		exit(EXIT_FAILURE);
+	}
+
 	fscanf(dl, "%[^\n]", base);
 	fclose(dl);
 }
 
-//-------------------------------------------------------------- GuardarIdioma ------------------------------------------------------------
+//-------------------------------------------------------------- Guardar Idioma ------------------------------------------------------------
+//Permite seleccionar el idioma por defecto del juego
 void GuardarIdioma(Idioma *idioma)
 {
 	FILE *dl = fopen("Idiomas/_default.dat", "r"); // Abro archivo en modo lectura para leer el idioma que esta por defecto
+	
+	system("cls"); // Limpia la consola
+
+	// Error al abrir el archivo
+	if (dl == NULL)
+	{
+		fprintf(stderr, "No se pudo abrir correctamente el archivo Idiomas/_default.dat\n");
+		exit(EXIT_FAILURE);
+	}
+
 	char porDefecto[TSTRCHICO];
-	int o;										// Selector de opcion
+	int OpcionIdiomas;										// Selector de opcion
 	int tam = 0;								// Contador de archivos
 	char **files = malloc(10 * sizeof(char *)); // reservamos memoria para el arreglo de nombres de archivos
 
-	system("cls"); // Limpio pantalla
-
 	fgets(porDefecto, sizeof(porDefecto), dl);						  // Guardo el nombre del archivo que hay en el archivo default
-	fclose(dl);														  // Cierro el archivo abierto en modo lectura para despues abrirlo en modo escritura
+	fclose(dl);	                                                      // Cierro el archivo abierto en modo lectura para despues abrirlo en modo escritura
+	
+	setColor(CIAN_CLARO);													  
 	printf("\t---- %s %s ----\n", idioma->idiomaDefecto, porDefecto); // Idioma por defecto:
+	setColor(BLANCO);
 
 	LeerDirectorio(files, &tam);				  // Funcion de leer todos los archivos en el directorio de Idioma
 	printf("\n%s\n", idioma->idiomasDisponibles); // Idiomas disponibles:
@@ -253,21 +281,29 @@ void GuardarIdioma(Idioma *idioma)
 	do
 	{
 		printf("\n%s %d:\n", idioma->intercambiarIdioma, tam); // Elija un idioma del 1 al n
-		scanf("%d", &o);
+		scanf("%d", &OpcionIdiomas);
 
-		if (o < 1 || o > tam)
+		if (OpcionIdiomas < 1 || OpcionIdiomas > tam)
 		{
 			printf("\t%s\n", idioma->invOP); // Opcion Invalida!
 		}
 
-	} while (o < 1 || o > tam);
+	} while (OpcionIdiomas < 1 || OpcionIdiomas > tam);
 
 	// Cargo el idioma con el nombre del archivo elegido
 	dl = fopen("Idiomas/_default.dat", "w");					// Abro el archivo en modo escritura para limpiarlo del anterior
+
+	// Error al abrir el archivo
+	if (dl == NULL)
+	{
+		fprintf(stderr, "No se pudo abrir correctamente el archivo Idiomas/_default.dat\n");
+		exit(EXIT_FAILURE);
+	}
+
 	fputs("Idiomas/", dl);										// Le agrego al contenido del archivo el directorio de los idiomas
-	fputs(files[o - 1], dl);									// Le agrego al archivo el nombre del idioma
+	fputs(files[OpcionIdiomas - 1], dl);									// Le agrego al archivo el nombre del idioma
 	fclose(dl);													// Cierro el archivo en modo escritura
-	printf("\n%s %s\n\n", idioma->idiomaDefecto, files[o - 1]); // Idioma por defecto:
+	printf("\n%s %s\n\n", idioma->idiomaDefecto, files[OpcionIdiomas - 1]); // Idioma por defecto:
 
 	// LIBERO MEMORIA DE CADA NOMBRE DE ARCHIVO DE DIRECTORIO Y DEL ARREGLO DE DIRECTORIOS
 	for (int i = 0; i < tam; i++)
@@ -279,7 +315,8 @@ void GuardarIdioma(Idioma *idioma)
 	system("pause");
 }
 
-//-------------------------------------------------------- LEER DIRECTORIO ------------------------------------------------------
+//-------------------------------------------------------- Leer Directorio ------------------------------------------------------
+//Lee el directorio de idiomas y almacena los nombres de los archivos en un array de strings
 void LeerDirectorio(char **files, int *tam)
 {
 	DIR *d = opendir("Idiomas"); // puntero a un flujo de directorio
@@ -328,4 +365,11 @@ void LeerDirectorio(char **files, int *tam)
 		}
 	}
 	closedir(d); // cerramos el flujo de directorio
+}
+
+//-------------------------------------------------------- Poner color en la terminal ------------------------------------------------------
+//Permite setear el color del texto de la terminal a uno en especifico (parte visual)
+void setColor(int color)
+{
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }

@@ -3,11 +3,28 @@
 #include <stdbool.h>
 #include <dirent.h>
 #include <string.h>
+#include <windows.h>
 
 // Defines
 #define TSTRCHICO 50	 // Tamaño string chico para cargar idioma por defecto
 #define TSTRGRANDE 10000 // Tamaño string grande para la mayoria de los reservar memoria
 #define PASSWORD "123"	 // Contraseña para el modo DEBUG
+
+//Paleta de colores
+#define AZUL 1
+#define VERDE 2
+#define CIAN 3
+#define ROJO 4
+#define MAGENTA 5
+#define AMARILLO 6
+#define BLANCO 7
+#define GRIS 8
+#define AZUL_CLARO 9
+#define VERDE_CLARO 10
+#define CIAN_CLARO 11
+#define ROJO_CLARO 12
+#define AMARILLO_CLARO 13
+#define BLANCO_BLANCO 14
 
 // Registros
 // Palabra
@@ -62,3 +79,6 @@ void AsignarMemoria(char **puntero, FILE *fp);
 void GuardarIdioma(Idioma *idioma);
 void CargarDefaultABase(char *base);
 void LeerDirectorio(char **files, int *tam);
+
+// Colores
+void setColor(int color);

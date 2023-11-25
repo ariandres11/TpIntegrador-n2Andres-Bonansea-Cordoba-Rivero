@@ -1,6 +1,7 @@
 #include "ranking.h"
 
 //-------------------------------------------------------- Limpieza leaderboard ------------------------------------------------------
+//Limpia el arreglo leaderboard (de Jugadores) poniendoles valores base
 void LimpiezaLeaderboard(Jugador *leaderboard)
 {
 	for (int i = 0; i < JUGADORES_MAX; i++)
@@ -12,11 +13,15 @@ void LimpiezaLeaderboard(Jugador *leaderboard)
 }
 
 //-------------------------------- Impresion Ranking ----------------------------
+//Realiza un impresion de los jugadores cargados en el registro de ranking
 void ImpresionRanking(Jugador *leaderboard, Idioma *idioma)
 {
 	system("cls"); // Limpio pantalla
+	setColor(AMARILLO); 
 
 	printf("\n\t\t%s\n\n", idioma->rankingJugadores); //----- RANKING DE JUGADORES -----
+
+	setColor(BLANCO);
 
 	for (int i = 0; i < JUGADORES_MAX; i++)
 	{
@@ -31,6 +36,7 @@ void ImpresionRanking(Jugador *leaderboard, Idioma *idioma)
 }
 
 //-------------------------------- Actualizar Ranking ----------------------------
+//Actualiza el ranking de jugadores cuando un nuevo jugador gana
 void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 {
 	int i;
@@ -68,9 +74,17 @@ void ActualizarRanking(Jugador *jugador, Jugador *leaderboard)
 }
 
 //-------------------------------- Cargar RankingDB ----------------------------
+//Carga el leaderboard desde un archivo (carga la base de datos)
 void CargarRankingDB(Jugador *leaderboard)
 {
 	FILE *DB = fopen("_RankingDB.dat", "r");
+
+	// Error al abrir el archivo
+	if (DB == NULL)
+	{
+		fprintf(stderr, "No se pudo abrir correctamente el archivo _RankingDB.dat\n");
+		exit(EXIT_FAILURE);
+	}
 
 	char *descargar = malloc(sizeof(char *)); // String para obtener una linea de 1 jugador
 
@@ -94,9 +108,17 @@ void CargarRankingDB(Jugador *leaderboard)
 }
 
 //-------------------------------- Guardar RankingDB ----------------------------
+//Almacena el leaderboard en un archivo con el formato requerido (guarda en la base de datos)
 void GuardarRankingDB(Jugador *leaderboard)
 {
 	FILE *DB = fopen("_RankingDB.dat", "w");
+
+	// Error al abrir el archivo
+	if (DB == NULL)
+	{
+		fprintf(stderr, "No se pudo abrir correctamente el archivo _RankingDB.dat\n");
+		exit(EXIT_FAILURE);
+	}
 
 	char *cadenaAux = malloc(sizeof(char)); // Cadena auxiliar para las conversiones de entero y flotante
 
@@ -125,21 +147,65 @@ void GuardarRankingDB(Jugador *leaderboard)
 	fclose(DB); // Cierro archivo de jugadores
 }
 
+//-------------------------------- Jugador Existente ----------------------------
+//Chequea si el nombre del jugador ya se encuentra dentro del leaderboard (case sensitive)
+int JugadorExistente(Jugador *jugador, Jugador *leaderboard)
+{
+	for (int i = 0; i < JUGADORES_MAX; i++)
+	{
+		if (strcmp(jugador->nombre, leaderboard[i].nombre)==0)
+		{
+			return i; // Retorna la posicion del jugador si se encuentra
+		}
+	}
+	return -1; // Retorna -1 si el nombre del jugador no se encuentra
+
+}
+
+//-------------------------------- Actualizar Jugador Existente ----------------------------
+//Funcion que limpia o no las estadisticas del jugador en el leaderboard en caso de que se encuentre y las mismas sean inferiores
+void LimpiarJugadorExistentePeor(Jugador *jugador, Jugador *leaderboard){
+	
+	int posicionJugador = JugadorExistente(jugador,leaderboard);
+
+	if (posicionJugador != -1)//El jugador ya se encontraba en el leaderboard
+	{
+		if (jugador->intentosTotales<leaderboard[posicionJugador].intentosTotales) //Si la cantidad de intentos nueva es menor
+		{
+			//limpio el jugador del leaderboard
+			strcpy(leaderboard[posicionJugador].nombre, "");
+			leaderboard[posicionJugador].intentosTotales = INTENTOSGB;
+			leaderboard[posicionJugador].tiempo = 0.0;
+
+		}else if(jugador->intentosTotales == leaderboard[posicionJugador].intentosTotales && jugador->tiempo<leaderboard[posicionJugador].tiempo){ //Si la cantidad de intentos es igual pero el tiempo es menor
+			//limpio el jugador del leaderboard
+			strcpy(leaderboard[posicionJugador].nombre, "");
+			leaderboard[posicionJugador].intentosTotales = INTENTOSGB;
+			leaderboard[posicionJugador].tiempo = 0.0;
+		}
+	}
+}
+
 //-------------------------------- Debug Ranking ----------------------------
+//Funcion especial cundo se encuentra activo el modo debug para poder eliminar el leaderboard
 void DebugRanking(Jugador *leaderboard)
 {
-	int o;
+	int opcionDebug;
+
+	setColor(GRIS);
 	do
 	{
 		printf("\n\n* DEBUG: desea borrar el ranking de jugadores (registro) (1.Si/2.No): ");
-		scanf("%d", &o);
-		if (o < 1 || o > 2)
+		scanf("%d", &opcionDebug);
+		if (opcionDebug < 1 || opcionDebug > 2)
 		{
 			printf("\t\tXX Ingrese una opcion valida! XX\n");
 		}
-	} while (o < 1 || o > 2);
+	} while (opcionDebug < 1 || opcionDebug > 2);
+	
+	setColor(BLANCO);
 
-	if (o == 1)
+	if (opcionDebug == 1)
 	{
 		LimpiezaLeaderboard(leaderboard);
 	}
