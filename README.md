@@ -29,6 +29,6 @@ Instrucciones de ejecucion:<br>
 * Modo DEBUG (contraseña: 123) (./AhorcadoPRINCIPAL.exe DEBUG):<br>
 <img src="Imagenes_README/ModoDEBUG.png" alt="Juego DEBUG" style="max-width:20%;"/><br>
 * Modo con idioma por parametros (./AhorcadoPRINCIPAL.exe Idiomas/"idiomaElegido.dat"):<br>
-<img src="Imagenes_README/ModoDefault.png" alt="Juego Idioma por parametros" style="max-width:20%;"/><br>
+<img src="Imagenes_README/ModoIdiomaConParametros.png" alt="Juego Idioma por parametros" style="max-width:20%;"/><br>
 
 
